@@ -15,6 +15,7 @@ class Otelo:
 
         self.jugador_actual = 2 #Según las reglas de Otelo, siempre empiezan las fichas negras
 
+
     def imprimir_tablero(self):
 
         for i in range(8):
