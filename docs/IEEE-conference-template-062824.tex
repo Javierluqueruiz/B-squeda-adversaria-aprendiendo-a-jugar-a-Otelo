@@ -1,0 +1,166 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+%Template version as of 6/27/2024
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage{listings} 
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{Aprendiendo a jugar a Otelo: Agente Inteligente con Búsqueda Adversaria y Deep Learning}
+
+\author{\IEEEauthorblockN{1\textsuperscript{st} Javier Luque Ruiz}
+\IEEEauthorblockA{\textit{Grado en Ingeniería Informática - Ingeniería del Software} \\
+\textit{Universidad de Sevilla}\\
+Sevilla, España \\
+javluqrui@alum.us.es}
+}
+
+\maketitle
+
+\begin{abstract}
+En este trabajo se explorará el desarrollo de un agente inteligente para el clásico juego de tablero Otelo (Reversi). 
+El objetivo principal es construir un jugador capaz de tomar decisiones estratégicas mediante la implementación del 
+algoritmo clásico de Minimax con poda alfa-beta para explorar el espacio de decisiones. Adicionalmente, se integrará 
+una red neuronal profunda entrenada mediante autojuego para proporcionar una heurística de evaluación de las posiciones 
+intermedias, reemplazando las funciones de evaluación manuales clásicas.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Inteligencia Artificial, Otelo, Reversi, Minimax, Poda Alfa-Beta, Deep Learning, Python.
+\end{IEEEkeywords}
+
+\section{Introducción}
+El desarrollo de agentes inteligentes capaces de tomar decisiones estratégicas en juegos de tablero ha sido uno 
+de los grandes hitos de la Inteligencia Artificial. Inspirado en los éxitos recientes de sistemas basados en 
+aprendizaje profundo, este trabajo explora la combinación de algoritmos de búsqueda clásica con técnicas modernas de redes neuronales.
+
+El objetivo principal de este proyecto es construir un agente inteligente para el clásico juego de Otelo (también conocido como Reversi). 
+Específicamente, se aborda la variante del proyecto correspondiente a la convocatoria de julio, la cual requiere la implementación del 
+algoritmo Minimax con poda alfa-beta para explorar el espacio de decisiones. La aportación central del sistema consiste en sustituir las 
+funciones heurísticas manuales por una red neuronal profunda, la cual aprenderá a evaluar las posiciones intermedias del tablero basándose 
+en un conjunto de datos generado mediante partidas de autojuego.
+
+\section{Preeliminares}
+\subsection{El juego de Otelo}
+Otelo es un juego de estrategia de suma cero con información perfecta para dos jugadores, el cual se disputa sobre un tablero de $8 \times 8$ casillas. 
+La partida inicializa con una disposición central de cuatro fichas cruzadas (dos blancas y dos negras), cediendo el primer movimiento al jugador con las piezas negras.
+
+La mecánica central del juego es el \texttt{flanqueo}: un movimiento legal consiste en colocar una ficha en una casilla vacía de forma que, 
+en línea recta (horizontal, vertical o diagonal), una o más piezas del oponente queden atrapadas entre la nueva ficha y otra pieza del 
+jugador activo. Las fichas flanqueadas son capturadas y cambian de color. Si un jugador carece de movimientos legales, está obligado a 
+pasar su turno. La partida concluye cuando el tablero se llena o ningún jugador puede realizar un movimiento válido, resultando ganador 
+aquel con mayor número de fichas de su color.
+
+\subsection{Búsqueda Adversaria y Poda Alfa-Beta}
+El algoritmo Minimax es una técnica fundamental en la búsqueda adversaria que modela la toma de decisiones asumiendo que ambos jugadores 
+actuarán de forma óptima: el agente intentará maximizar su puntuación (MAX) mientras que el oponente intentará minimizarla (MIN). Debido a 
+que explorar el árbol de estados completo para Otelo es computacionalmente inabarcable, se implementa una estrategia de profundidad 
+limitada (\textit{cutting-off search}). Al alcanzar dicha profundidad, el algoritmo detiene la simulación y evalúa la calidad del tablero mediante una heurística.
+
+Para optimizar aún más los tiempos de respuesta, se aplica la poda alfa-beta. Esta mejora algorítmica mantiene el control de los 
+peores escenarios posibles (los valores $\alpha$ y $\beta$) y descarta matemáticamente aquellas ramas del árbol que no influirán en la 
+decisión final, reduciendo el número de estados evaluados sin alterar la optimalidad del movimiento elegido.
+
+
+\section{Implementación}
+
+\subsection{Motor del Juego}
+Para la representación del tablero de Otelo se ha seleccionado una matriz bidimensional de $8 \times 8$ elementos utilizando la librería \texttt{NumPy}.
+Esta decisión de diseño responde a la necesidad de gestionar los estados de forma eficiente y preparar los datos para su posterior tratamiento en la fase de Deep Learning.
+
+De acuerdo con las especificaciones del enunciado del proyecto, se ha optado por utilizar la siguiente convención numérica para representar los distintos estados de las casillas:
+\begin{itemize}
+    \item \textbf{0}: Casilla vacía.
+    \item \textbf{1}: Casilla ocupada por una ficha blanca.
+    \item \textbf{2}: Casilla ocupada por una ficha negra.
+\end{itemize}
+
+La lógica de juego se encuentra en la clase \texttt{Otelo}. La validación de los movimientos se realiza mediante la función \texttt{es\_movimiento\_valido}, 
+cuyo funcionamiento se basa en escanear las ocho direcciones posibles desde la casilla seleccionada empleando tuplas de desplazamiento:
+\[
+D = \{(0,1), (1,1), (1,0), (1,-1)
+\]
+\[
+(0,-1), (-1,-1), (-1,0), (-1,1)\}
+\]
+
+Un movimiento se considera legal si, al recorrer una dirección, se encuentra al menos una ficha del oponente seguida de una ficha propia, sin que haya casillas vacías intermedias ni se 
+salga del tablero. El método \texttt{ejecutar\_movimiento} aprovecha esta lógica para almacenar las coordenadas de las piezas atrapadas y actualiza el tablero en consecuencia, revertiendo las fichas del oponente a las propias.
+
+\subsection{Interfaz Gráfica y Máquina de Estados}
+La interacción con el usuario y la visualización del estado del juego se gestionan en el archivo \texttt{main.py} mediante la API gráfica de \texttt{PyGame}. 
+Para evitar el acoplamiento de código y controlar de forma robusta el flujo de la aplicación, se ha diseñado una Arquitectura basada en una Máquina de Estados 
+Estricta. El bucle principal del juego (\textit{Game Loop}) evalúa de forma continua los eventos del sistema y renderiza la interfaz basándose en el estado activo:
+
+\begin{itemize}
+    \item \textbf{\texttt{MENU}}: Pantalla de inicio que presenta el título y el botón para iniciar una nueva partida.
+    \item \textbf{\texttt{JUGANDO}}: Estado activo durante el juego, donde se procesan los movimientos de los jugadores y se actualiza la visualización del tablero. Cuenta con un panel 
+    inferior que muestra información relevante, como el turno actual y el marcador de fichas.
+    \item \textbf{\texttt{PASAR\_TURNO}}: Estado crítico de validación que se activa cuando un jugador no tiene movimientos válidos disponibles, pero la partida continúa. En este estado,
+    se notifica al jugador que está obligado a pasar turno mediante una confirmación explícita.
+    \item \textbf{\texttt{FIN}}: Estado final que congela el estado del tablero y muestra el resultado de la partida, indicando el ganador o si ha habido un empate, así como el recuento final de fichas. 
+\end{itemize}
+
+\section{Pruebas y experimentación}
+\section{Conclusiones}
+\section{Bibliografía}
+
+\begin{thebibliography}{00}
+    \bibitem{russell} S. Russell and P. Norvig, \textit{Artificial Intelligence: A Modern Approach}, 4th ed., Pearson, 2020, ch. 5, ``Adversarial Search''.
+
+\end{thebibliography}
+
+
+
+\section*{References}
+
+Please number citations consecutively within brackets \cite{b1}. The 
+sentence punctuation follows the bracket \cite{b2}. Refer simply to the reference 
+number, as in \cite{b3}---do not use ``Ref. \cite{b3}'' or ``reference \cite{b3}'' except at 
+the beginning of a sentence: ``Reference \cite{b3} was the first $\ldots$''
+
+Number footnotes separately in superscripts. Place the actual footnote at 
+the bottom of the column in which it was cited. Do not put footnotes in the 
+abstract or reference list. Use letters for table footnotes.
+
+Unless there are six authors or more give all authors' names; do not use 
+``et al.''. Papers that have not been published, even if they have been 
+submitted for publication, should be cited as ``unpublished'' \cite{b4}. Papers 
+that have been accepted for publication should be cited as ``in press'' \cite{b5}. 
+Capitalize only the first word in a paper title, except for proper nouns and 
+element symbols.
+
+For papers published in translation journals, please give the English 
+citation first, followed by the original foreign-language citation \cite{b6}.
+
+\begin{thebibliography}{00}
+\bibitem{b1} G. Eason, B. Noble, and I. N. Sneddon, ``On certain integrals of Lipschitz-Hankel type involving products of Bessel functions,'' Phil. Trans. Roy. Soc. London, vol. A247, pp. 529--551, April 1955.
+\bibitem{b2} J. Clerk Maxwell, A Treatise on Electricity and Magnetism, 3rd ed., vol. 2. Oxford: Clarendon, 1892, pp.68--73.
+\bibitem{b3} I. S. Jacobs and C. P. Bean, ``Fine particles, thin films and exchange anisotropy,'' in Magnetism, vol. III, G. T. Rado and H. Suhl, Eds. New York: Academic, 1963, pp. 271--350.
+\bibitem{b4} K. Elissa, ``Title of paper if known,'' unpublished.
+\bibitem{b5} R. Nicole, ``Title of paper with only first word capitalized,'' J. Name Stand. Abbrev., in press.
+\bibitem{b6} Y. Yorozu, M. Hirano, K. Oka, and Y. Tagawa, ``Electron spectroscopy studies on magneto-optical media and plastic substrate interface,'' IEEE Transl. J. Magn. Japan, vol. 2, pp. 740--741, August 1987 [Digests 9th Annual Conf. Magnetics Japan, p. 301, 1982].
+\bibitem{b7} M. Young, The Technical Writer's Handbook. Mill Valley, CA: University Science, 1989.
+\bibitem{b8} D. P. Kingma and M. Welling, ``Auto-encoding variational Bayes,'' 2013, arXiv:1312.6114. [Online]. Available: https://arxiv.org/abs/1312.6114
+\bibitem{b9} S. Liu, ``Wi-Fi Energy Detection Testbed (12MTC),'' 2023, gitHub repository. [Online]. Available: https://github.com/liustone99/Wi-Fi-Energy-Detection-Testbed-12MTC
+\bibitem{b10} ``Treatment episode data set: discharges (TEDS-D): concatenated, 2006 to 2009.'' U.S. Department of Health and Human Services, Substance Abuse and Mental Health Services Administration, Office of Applied Studies, August, 2013, DOI:10.3886/ICPSR30122.v2
+\bibitem{b11} K. Eves and J. Valasek, ``Adaptive control for singularly perturbed systems examples,'' Code Ocean, Aug. 2023. [Online]. Available: https://codeocean.com/capsule/4989235/tree
+\end{thebibliography}
+
+\vspace{12pt}
+\color{red}
+IEEE conference templates contain guidance text for composing and formatting conference papers. Please ensure that all template text is removed from your conference paper prior to submission to the conference. Failure to remove the template text from your paper may result in your paper not being published.
+
+\end{document}
