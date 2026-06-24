@@ -198,7 +198,7 @@ def main():
                         partida = Otelo()
 
                         color_ia = random.choice([1, 2])
-                        agente = AgenteMinimax(jugadorIA=color_ia, profundidad_maxima=3)
+                        agente = AgenteMinimax(jugadorIA=color_ia, profundidad_maxima=5)
 
                 elif estado == "JUGANDO":
                     if rect_boton_salir is not None and rect_boton_salir.collidepoint(evento.pos):
@@ -243,6 +243,15 @@ def main():
                         estado = "FIN"
                     elif len(partida.obtener_movimientos_validos(partida.jugador_actual)) == 0:
                                     estado = "PASAR_TURNO"
+
+                else:
+                    print("La IA no tiene movimientos. Pasa el turno")
+                    partida.jugador_actual = 1 if agente.jugadorIA == 2 else 2
+
+                    if partida.es_fin_de_juego():
+                        estado == "FIN"
+                    elif len(partida.obtener_movimientos_validos(partida.jugador_actual)) == 0:
+                        estado == "PASAR TURNO"
 
         
 

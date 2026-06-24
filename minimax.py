@@ -45,8 +45,9 @@ class AgenteMinimax:
         
         if maximizando:
             movimientos = partida.obtener_movimientos_validos(self.jugadorIA)
+            if len(movimientos) == 0:
+                return self._minimax_alfa_beta(partida, profundidad-1, alfa, beta, False)
             max_eval = -float('inf')
-
             for movimiento in movimientos:
                 partida_copia = copy.deepcopy(partida)
                 f, c  = movimiento
@@ -65,6 +66,8 @@ class AgenteMinimax:
             oponente = 1 if self.jugadorIA == 2 else 2
             movimientos = partida.obtener_movimientos_validos(oponente)
 
+            if len(movimientos) == 0:
+                return self._minimax_alfa_beta(partida, profundidad-1, alfa, beta, True)
             min_eval = float('inf')
 
             for movimiento in movimientos:
