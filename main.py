@@ -1,12 +1,15 @@
 import pygame
 import sys
+import random
+
 from otelo import Otelo
+from minimax import AgenteMinimax
 
 # Dimensiones
 TAMAÑO_CASILLA = 80
 ANCHO = TAMAÑO_CASILLA * 8
 ALTO_TABLERO = TAMAÑO_CASILLA * 8
-ALTO_PANEL = 80
+ALTO_PANEL = 100
 ALTO = ALTO_TABLERO + ALTO_PANEL
 
 # Colores
@@ -30,24 +33,22 @@ def dibujar_menu(pantalla):
     pantalla.fill(COLOR_FONDO)
 
     texto_titulo = FUENTE_TITULO.render("OTELO", True, COLOR_NEGRO)
-    rect_titulo = texto_titulo.get_rect(center=(ANCHO // 2, ALTO //3))
+    rect_titulo = texto_titulo.get_rect(center=(ANCHO // 2, ALTO // 3))
     pantalla.blit(texto_titulo, rect_titulo)
 
-    ancho_boton, alto_boton = 250, 60
-    rect_boton = pygame.Rect(ANCHO // 2- ancho_boton // 2, ALTO // 2, ancho_boton, alto_boton)
+    ancho_boton, alto_boton = 300, 60
+    
+    rect_pvp = pygame.Rect(ANCHO // 2 - ancho_boton // 2, ALTO // 2 - 40, ancho_boton, alto_boton)
+    pygame.draw.rect(pantalla, COLOR_BOTON, rect_pvp, border_radius=10)
+    texto_pvp = FUENTE_BOTON.render("Jugar 1 vs 1", True, COLOR_BLANCO)
+    pantalla.blit(texto_pvp, texto_pvp.get_rect(center=rect_pvp.center))
 
-    pos_raton = pygame.mouse.get_pos()
-    if rect_boton.collidepoint(pos_raton):
-        pygame.draw.rect(pantalla, COLOR_BOTON_HOVER, rect_boton, border_radius=10)
-    else:
-        pygame.draw.rect(pantalla, COLOR_BOTON, rect_boton, border_radius=10)
+    rect_pvia = pygame.Rect(ANCHO // 2 - ancho_boton // 2, ALTO // 2 + 40, ancho_boton, alto_boton)
+    pygame.draw.rect(pantalla, COLOR_BOTON, rect_pvia, border_radius=10)
+    texto_pvia = FUENTE_BOTON.render("Jugar vs IA", True, COLOR_BLANCO)
+    pantalla.blit(texto_pvia, texto_pvia.get_rect(center=rect_pvia.center))
 
-    texto_boton = FUENTE_BOTON.render("Empezar Partida", True, COLOR_BLANCO)
-    rect_texto = texto_boton.get_rect(center=rect_boton.center)
-    pantalla.blit(texto_boton, rect_texto)
-
-
-    return rect_boton
+    return rect_pvp, rect_pvia
 
 
 def dibujar_tablero(pantalla, juego):
@@ -81,6 +82,19 @@ def dibujar_tablero(pantalla, juego):
 
     rect_turno = texto_turno.get_rect(right=ANCHO - 20, top=ALTO_TABLERO + 25)
     pantalla.blit(texto_turno, rect_turno)
+
+    ancho_boton_salir = 100
+    alto_boton_salir = 40
+    x_boton = ANCHO - ancho_boton_salir - 20
+    y_boton = ALTO_TABLERO + 55
+
+    rect_salir = pygame.Rect(x_boton, y_boton, ancho_boton_salir, alto_boton_salir)
+
+    pygame.draw.rect(pantalla, (200, 50, 50), rect_salir, border_radius=5)
+    text_salir = FUENTE_INFO.render("Menú", True, COLOR_BLANCO)
+    pantalla.blit(text_salir, text_salir.get_rect(center=rect_salir.center)) 
+
+    return rect_salir
 
 def dibujar_fin_partida(pantalla, partida):
     dibujar_tablero(pantalla, partida)
@@ -152,46 +166,94 @@ def main():
 
     estado = "MENU"
     partida = None
+    modo_juego = None
+    agente = None
     rect_boton_pasar = None
 
     corriendo = True
     while corriendo:
+
+        if estado == "MENU":
+            rect_pvp, rect_pvia = dibujar_menu(pantalla)
+        elif estado == "JUGANDO":
+            rect_boton_salir = dibujar_tablero(pantalla, partida)
+        elif estado == "PASAR_TURNO":
+            rect_boton_pasar = dibujar_pasar_turno(pantalla, partida)
+        elif estado == "FIN":
+            dibujar_fin_partida(pantalla, partida)
+        
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 corriendo = False
 
             elif evento.type == pygame.MOUSEBUTTONDOWN:
                 if estado == "MENU":
-                    if rect_boton.collidepoint(evento.pos):
+                    if rect_pvp.collidepoint(evento.pos):
+                        modo_juego="PvP"
                         estado = "JUGANDO"
                         partida = Otelo()
-                elif estado == "JUGANDO":
-                    pos_x, pos_y = evento.pos
+                    elif rect_pvia.collidepoint(evento.pos):
+                        modo_juego="PvIA"
+                        estado="JUGANDO"
+                        partida = Otelo()
 
-                    if pos_y < ALTO_TABLERO:
-                        fila = pos_y // 80 
-                        columna = pos_x // 80
+                        color_ia = random.choice([1, 2])
+                        agente = AgenteMinimax(jugadorIA=color_ia, profundidad_maxima=5)
+
+                elif estado == "JUGANDO":
+                    if rect_boton_salir is not None and rect_boton_salir.collidepoint(evento.pos):
+                        estado="MENU"
                     
-                        if partida.es_movimiento_valido(fila, columna, partida.jugador_actual):
-                            partida.ejecutar_movimiento(fila, columna, partida.jugador_actual)
-                            if partida.es_fin_de_juego():
-                                estado = "FIN"   
-                            elif len(partida.obtener_movimientos_validos(partida.jugador_actual)) == 0:
-                                estado = "PASAR_TURNO"
+                    else:
+
+                        es_turno_humano = (modo_juego=="PvP") or (modo_juego=="PvIA" and partida.jugador_actual != agente.jugadorIA)
+
+                        if es_turno_humano:
+                            pos_x, pos_y = evento.pos
+
+                            if pos_y < ALTO_TABLERO:
+                                fila = pos_y // 80 
+                                columna = pos_x // 80
+                            
+                                if partida.es_movimiento_valido(fila, columna, partida.jugador_actual):
+                                    partida.ejecutar_movimiento(fila, columna, partida.jugador_actual)
+                                    if partida.es_fin_de_juego():
+                                        estado = "FIN"   
+                                    elif len(partida.obtener_movimientos_validos(partida.jugador_actual)) == 0:
+                                        estado = "PASAR_TURNO"
 
                 elif estado == "PASAR_TURNO":
                     if rect_boton_pasar and rect_boton_pasar.collidepoint(evento.pos):
                         partida.jugador_actual = 1 if partida.jugador_actual == 2 else 2
                         estado = "JUGANDO"
 
-        if estado == "MENU":
-            rect_boton = dibujar_menu(pantalla)
-        elif estado == "JUGANDO":
-            dibujar_tablero(pantalla, partida)
-        elif estado == "PASAR_TURNO":
-            rect_boton_pasar = dibujar_pasar_turno(pantalla, partida)
-        elif estado == "FIN":
-            dibujar_fin_partida(pantalla, partida)
+        if estado == "JUGANDO" and modo_juego=="PvIA":
+            if partida.jugador_actual == agente.jugadorIA:
+                dibujar_tablero(pantalla, partida)
+                pygame.display.flip()
+                pygame.time.wait(1000)
+
+                movimiento = agente.obtener_mejor_movimiento(partida)
+
+                if movimiento is not None:
+                    f, c, = movimiento
+                    partida.ejecutar_movimiento(f, c, agente.jugadorIA)
+
+                    if partida.es_fin_de_juego():
+                        estado = "FIN"
+                    elif len(partida.obtener_movimientos_validos(partida.jugador_actual)) == 0:
+                                    estado = "PASAR_TURNO"
+
+                else:
+                    print("La IA no tiene movimientos. Pasa el turno")
+                    partida.jugador_actual = 1 if agente.jugadorIA == 2 else 2
+
+                    if partida.es_fin_de_juego():
+                        estado == "FIN"
+                    elif len(partida.obtener_movimientos_validos(partida.jugador_actual)) == 0:
+                        estado == "PASAR TURNO"
+
+        
 
         pygame.display.flip()
 
