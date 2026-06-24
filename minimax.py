@@ -1,4 +1,5 @@
 import copy
+import random
 
 class AgenteMinimax: 
     def __init__(self, jugadorIA, profundidad_maxima):
@@ -22,19 +23,25 @@ class AgenteMinimax:
 
         movimientos = partida.obtener_movimientos_validos(self.jugadorIA)
         mejor_puntuacion = -float('inf')
-        movimiento_max = None
+        mejores_movimientos = []
 
         for movimiento in movimientos:
             partida_copia = copy.deepcopy(partida)
             f, c = movimiento
             partida_copia.ejecutar_movimiento(f, c, self.jugadorIA)
 
-            evaluacion = self._minimax_alfa_beta(partida_copia, self.profundidad_maxima, alfa, beta, True)
+            evaluacion = self._minimax_alfa_beta(partida_copia, self.profundidad_maxima-1, alfa, beta, False)
             if evaluacion > mejor_puntuacion:
                 mejor_puntuacion = evaluacion
-                movimiento_max = movimiento
+                mejores_movimientos.clear()
+                mejores_movimientos.append(movimiento)
+            elif evaluacion == mejor_puntuacion:
+                mejores_movimientos.append(movimiento)
 
-        return movimiento_max
+        if len(mejores_movimientos) != 0:
+            return random.choice(mejores_movimientos)
+        else:
+            return None
 
 
 
