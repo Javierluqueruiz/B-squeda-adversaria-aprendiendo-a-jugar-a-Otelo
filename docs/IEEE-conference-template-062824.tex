@@ -134,6 +134,25 @@ Durante la implementación del agente, se identificaron y resolvieron dos desaf�
     Se introdujo un mecanismo de aleatorización en la selección de movimientos cuando múltiples opciones presentaban la misma evaluación. Esta imprevisibilidad es un requisito técnico fundamental para garantizar una generación de datos heterogénea y rica durante la fase de autojuego para el posterior entrenamiento de la red neuronal.
 \end{itemize}
 
+\subsection{Generación del Conjunto de Datos mediante Autojuego}
+Para entrenar la red neuronal, es necesario disponer de un conjunto de datos etiquetado que relacione estados del tablero con la calidad de la posición para el jugador activo. 
+Dado que no existen bases de datos públicas de partidas de Otelo, se ha desarrollado un módulo de autojuego que enfrenta al agente Minimax contra sí mismo.
+
+Se diseñó un entorno de simulación aislado de la interfaz gráfica donde dos agentes Minimax compiten entre sí. Durante la ejecución de cada partida, se registran los estados del 
+tablero antes de cada movimiento junto al jugador activo.
+
+Una vez finalizada la partida, se determina el ganador y se recorre el historial de estados para etiquetar cada posición con el resultado final desde la perspectiva del jugador activo en ese momento:
+\begin{itemize}
+    \item \textbf{+1}: Si el jugador activo ganó la partida.
+    \item \textbf{0}: Si la partida terminó en empate.
+    \item \textbf{-1}: Si el jugador activo perdió la partida.
+\end{itemize}
+
+Aprovechando la aleatoriedad introducida previamente en el agente para romper el determinismo, se simularon 500 partidas completas de forma automatizada, generando una base de 
+datos heterogénea de aproximadamente 30.000 tableros. Para optimizar el rendimiento de lectura durante la fase de entrenamiento, las estructuras de datos se transformaron 
+en tensores y se exportaron en formato binario nativo (\texttt{.npy}) haciendo uso de la librería \texttt{NumPy}, separando las características 
+de entrada (matrices de estado) de las etiquetas de salida.
+
 
 \section{Pruebas y experimentación}
 \section{Conclusiones}
