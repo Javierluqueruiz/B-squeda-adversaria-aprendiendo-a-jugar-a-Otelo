@@ -249,9 +249,9 @@ def main():
                     partida.jugador_actual = 1 if agente.jugadorIA == 2 else 2
 
                     if partida.es_fin_de_juego():
-                        estado == "FIN"
+                        estado = "FIN"
                     elif len(partida.obtener_movimientos_validos(partida.jugador_actual)) == 0:
-                        estado == "PASAR TURNO"
+                        estado = "PASAR_TURNO"
 
         
 
