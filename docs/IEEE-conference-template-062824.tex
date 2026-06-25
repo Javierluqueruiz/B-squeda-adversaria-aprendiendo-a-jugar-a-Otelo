@@ -7,6 +7,7 @@
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{algorithmic}
 \usepackage{graphicx}
+\usepackage{float}
 \usepackage{textcomp}
 \usepackage{xcolor}
 \usepackage[utf8]{inputenc}
@@ -56,6 +57,13 @@ en un conjunto de datos generado mediante partidas de autojuego.
 \subsection{El juego de Otelo}
 Otelo es un juego de estrategia de suma cero con información perfecta para dos jugadores, el cual se disputa sobre un tablero de $8 \times 8$ casillas. 
 La partida inicializa con una disposición central de cuatro fichas cruzadas (dos blancas y dos negras), cediendo el primer movimiento al jugador con las piezas negras.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.25\textwidth]{images/otelo-posicioninicial.png}
+    \caption{Tablero inicial de Otelo con la disposición central de fichas.}
+    \label{fig:otelo_board}
+\end{figure}
 
 La mecánica central del juego es el \texttt{flanqueo}: un movimiento legal consiste en colocar una ficha en una casilla vacía de forma que, 
 en línea recta (horizontal, vertical o diagonal), una o más piezas del oponente queden atrapadas entre la nueva ficha y otra pieza del 
@@ -113,6 +121,20 @@ Estricta. El bucle principal del juego (\textit{Game Loop}) evalúa de forma con
     \item \textbf{\texttt{FIN}}: Estado final que congela el estado del tablero y muestra el resultado de la partida, indicando el ganador o si ha habido un empate, así como el recuento final de fichas. 
 \end{itemize}
 
+\subsection{Agente Inteligente: Minimax con Poda Alfa-Beta}
+Para dotar a la máquina de capacidad de decisión, se ha implementado un agente basado en el algoritmo Minimax complementado con la optimizacion de poda alfa-beta. 
+Dado que el espacio de búsqueda de Otelo es considerablemente grande, el algoritmo se ejecuta con una profundidad limitada. Al alcanzar dicha profundidad, se aplica una función heurística
+de evaluación manual básica, consistente en la diferencia de fichas entre el jugador maximizador y el minimizador. 
+
+Durante la implementación del agente, se identificaron y resolvieron dos desafíos arquitectónicos principales para asegurar la robustez del agente:
+\begin{itemize}
+    \item \textbf{Gestión de turnos nulos en simulación}: En partidas avanzadas, es posible alcanzar estados donde un jugador no tiene movimientos válidos. Se implementó la lógica
+    recursiva necesaria para que el agente ceda el turno de forma virtual en su árbol de búsqueda, en lugar de evaluar érroneamente esa rama como una derrota inmediata. Esto evita colapsos lógicos y la devolución de jugadas nulas al motor gráfico.
+    \item \textbf{Ruptura del determinismo}: Al depender de una heurística simple de conteo de fichas, el agente podía generar movimientos repetitivos en situaciones de empate heurístico. 
+    Se introdujo un mecanismo de aleatorización en la selección de movimientos cuando múltiples opciones presentaban la misma evaluación. Esta imprevisibilidad es un requisito técnico fundamental para garantizar una generación de datos heterogénea y rica durante la fase de autojuego para el posterior entrenamiento de la red neuronal.
+\end{itemize}
+
+
 \section{Pruebas y experimentación}
 \section{Conclusiones}
 \section{Bibliografía}
@@ -146,18 +168,7 @@ For papers published in translation journals, please give the English
 citation first, followed by the original foreign-language citation \cite{b6}.
 
 \begin{thebibliography}{00}
-\bibitem{b1} G. Eason, B. Noble, and I. N. Sneddon, ``On certain integrals of Lipschitz-Hankel type involving products of Bessel functions,'' Phil. Trans. Roy. Soc. London, vol. A247, pp. 529--551, April 1955.
-\bibitem{b2} J. Clerk Maxwell, A Treatise on Electricity and Magnetism, 3rd ed., vol. 2. Oxford: Clarendon, 1892, pp.68--73.
-\bibitem{b3} I. S. Jacobs and C. P. Bean, ``Fine particles, thin films and exchange anisotropy,'' in Magnetism, vol. III, G. T. Rado and H. Suhl, Eds. New York: Academic, 1963, pp. 271--350.
-\bibitem{b4} K. Elissa, ``Title of paper if known,'' unpublished.
-\bibitem{b5} R. Nicole, ``Title of paper with only first word capitalized,'' J. Name Stand. Abbrev., in press.
-\bibitem{b6} Y. Yorozu, M. Hirano, K. Oka, and Y. Tagawa, ``Electron spectroscopy studies on magneto-optical media and plastic substrate interface,'' IEEE Transl. J. Magn. Japan, vol. 2, pp. 740--741, August 1987 [Digests 9th Annual Conf. Magnetics Japan, p. 301, 1982].
-\bibitem{b7} M. Young, The Technical Writer's Handbook. Mill Valley, CA: University Science, 1989.
-\bibitem{b8} D. P. Kingma and M. Welling, ``Auto-encoding variational Bayes,'' 2013, arXiv:1312.6114. [Online]. Available: https://arxiv.org/abs/1312.6114
-\bibitem{b9} S. Liu, ``Wi-Fi Energy Detection Testbed (12MTC),'' 2023, gitHub repository. [Online]. Available: https://github.com/liustone99/Wi-Fi-Energy-Detection-Testbed-12MTC
-\bibitem{b10} ``Treatment episode data set: discharges (TEDS-D): concatenated, 2006 to 2009.'' U.S. Department of Health and Human Services, Substance Abuse and Mental Health Services Administration, Office of Applied Studies, August, 2013, DOI:10.3886/ICPSR30122.v2
-\bibitem{b11} K. Eves and J. Valasek, ``Adaptive control for singularly perturbed systems examples,'' Code Ocean, Aug. 2023. [Online]. Available: https://codeocean.com/capsule/4989235/tree
-\end{thebibliography}
+\bibitem{otelo_rules} World Othello Federation, ``Othello Rules,'' [Online]. Disponible en: https://www.worldothello.org/about/about-othello/othello-rules\end{thebibliography}
 
 \vspace{12pt}
 \color{red}

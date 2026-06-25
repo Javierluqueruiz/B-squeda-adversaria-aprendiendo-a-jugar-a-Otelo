@@ -251,7 +251,7 @@ def main():
                     if partida.es_fin_de_juego():
                         estado = "FIN"
                     elif len(partida.obtener_movimientos_validos(partida.jugador_actual)) == 0:
-                        estado = "PASAR TURNO"
+                        estado = "PASAR_TURNO"
 
         
 
