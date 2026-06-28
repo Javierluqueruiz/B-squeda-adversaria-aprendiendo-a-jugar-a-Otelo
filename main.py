@@ -1,3 +1,6 @@
+import os 
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide" # Silencia el saludo de PyGame
+
 import pygame
 import sys
 import random
@@ -198,7 +201,7 @@ def main():
                         partida = Otelo()
 
                         color_ia = random.choice([1, 2])
-                        agente = AgenteMinimax(jugadorIA=color_ia, profundidad_maxima=5)
+                        agente = AgenteMinimax(jugadorIA=color_ia, profundidad_maxima=3)
 
                 elif estado == "JUGANDO":
                     if rect_boton_salir is not None and rect_boton_salir.collidepoint(evento.pos):

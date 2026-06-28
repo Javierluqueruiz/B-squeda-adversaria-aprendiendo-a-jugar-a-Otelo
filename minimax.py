@@ -1,18 +1,31 @@
+import os 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+import logging
+logging.getLogger('tensorflow').setLevel(logging.ERROR)
+
 import copy
 import random
+import numpy as np
+from keras.models import load_model
+
 
 class AgenteMinimax: 
     def __init__(self, jugadorIA, profundidad_maxima):
         self.jugadorIA = jugadorIA
         self.profundidad_maxima = profundidad_maxima
+        self.modelo = load_model("modelos/otelo.keras")
 
     def heuristica(self, partida):
 
-        blancas, negras = partida.calcular_puntuacion()
+        tablero = np.expand_dims(partida.tablero, axis=0)
+        prediccion = self.modelo(tablero, training=False).numpy()
+        nota = prediccion[0][0]
+
         if self.jugadorIA == 1:
-            puntuacion = blancas - negras
+            puntuacion = nota
         else:
-            puntuacion = negras - blancas
+            puntuacion = -nota
 
         return puntuacion
     
