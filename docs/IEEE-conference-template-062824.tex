@@ -153,6 +153,36 @@ datos heterogénea de aproximadamente 30.000 tableros. Para optimizar el rendimi
 en tensores y se exportaron en formato binario nativo (\texttt{.npy}) haciendo uso de la librería \texttt{NumPy}, separando las características 
 de entrada (matrices de estado) de las etiquetas de salida.
 
+\subsection{Arquitectura y Entrenamiento de la Red Neuronal}
+Una vez generado el conjunto de datos, se procedió a diseñar, compilar y entrenar una red neuronal profunda para aprender a evaluar las posiciones del tablero. Para ello, se utilizó la
+interfaz de \texttt{Keras} sobre el motor \texttt{TensorFlow}. Siguiendo un enfoque alineado con las prácticas de la asignatura, se implementó un modelo secuencial con la siguiente arquitectura:
+\begin{itemize}
+    \item \textbf{Capa de Entrada y Aplanado}: Recibe la matriz del tablero de $8 \times 8$ casillas, la cual es procesada mediante una capa de aplanado (\texttt{Flatten}) para 
+    convertirla en un vector unidimensional de 64 elementos.
+    \item \textbf{Capas Ocultas}: Dos capas densas (\texttt{Dense}) con 64 y 32 neuronas respectivamente, ambas con función de activación ReLU para introducir no linealidad
+    y evitar la saturación de gradientes.
+    \item \textbf{Capa de Salida}: Una única neurona con función de activación de tangente hiperbólica (\texttt{tanh}), que devuelve un valor continuo en el rango [-1, 1], 
+    representando la evaluación de la posición desde la perspectiva del jugador activo.
+\end{itemize}
+
+Para el proceso de optimización, se seleccionó el algoritmo de Descenso Estocástico por el Gradiente (SGD) con un factor de aprendizaje fijo de 0.01. La función de pérdida elegida fue
+el Error Cuadrático Medio (MSE), evaluada conjuntamente con la métrica del Error Absoluto Medio (MAE). El entrenamiento se llevó a cabo durante 50 épocas con un tamaño de lote de 256 ejemplos, 
+aplicando una división de 80\% para entrenamiento y 20\% para validación. 
+
+\subsection{Análisis de Resultados y Evaluación del Modelo}
+Tras completar las 50 épocas de entrenamiento, se observa que tanto el error de entrenamiento como el de validación se estabilizan en torno a valores de $0.97$ y $0.99$ respectivamente,
+con un Error Absoluto Medio (MAE) final de aproximadamente $0.98$. Para entender mejor estos resultados, hay que recordar que las etiquetas del conjunto de datos oscilan entre $-1$ y $1$. Que 
+el error medio sea cercano a $0.98$ indica que la red neuronal tiende a predecir valores cercanos a cero. En la práctica, esto significa que el modelo no se arriesga y evalúa la mayoría 
+de las posiciones como estados de empate
+
+Este resultado es coherente si analizamos la arquitectura elegida:
+\begin{itemize}
+    \item \textbf{Pérdida de la forma del tablero}: Al aplanar la matriz de $8 \times 8$ en un vector de 64 elementos, se pierde la información espacial y las relaciones entre las fichas adyacentes. Esto limita la capacidad del modelo para aprender patrones estratégicos complejos.
+    \item \textbf{Capacidad de la red}: Con solo dos capas ocultas y un número limitado de neuronas, la red puede carecer de la complejidad necesaria para capturar las sutilezas del juego de Otelo, especialmente en posiciones intermedias donde la estrategia es crucial.
+\end{itemize}
+
+A pesar de esta limitación, el modelo entrenado puede servir como una primera aproximación para evaluar posiciones de manera rápida: toda la estructura de datos se ha comunicado correctamente,
+el modelo ha entrenado de forma estable y el archivo resultante se ha integrado en tiempo real dentro del algoritmo Minimax.
 
 \section{Pruebas y experimentación}
 \section{Conclusiones}
