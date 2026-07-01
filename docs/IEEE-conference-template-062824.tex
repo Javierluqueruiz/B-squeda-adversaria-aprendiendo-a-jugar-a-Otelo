@@ -169,22 +169,44 @@ Para el proceso de optimización, se seleccionó el algoritmo de Descenso Estoc�
 el Error Cuadrático Medio (MSE), evaluada conjuntamente con la métrica del Error Absoluto Medio (MAE). El entrenamiento se llevó a cabo durante 50 épocas con un tamaño de lote de 256 ejemplos, 
 aplicando una división de 80\% para entrenamiento y 20\% para validación. 
 
-\subsection{Análisis de Resultados y Evaluación del Modelo}
-Tras completar las 50 épocas de entrenamiento, se observa que tanto el error de entrenamiento como el de validación se estabilizan en torno a valores de $0.97$ y $0.99$ respectivamente,
-con un Error Absoluto Medio (MAE) final de aproximadamente $0.98$. Para entender mejor estos resultados, hay que recordar que las etiquetas del conjunto de datos oscilan entre $-1$ y $1$. Que 
-el error medio sea cercano a $0.98$ indica que la red neuronal tiende a predecir valores cercanos a cero. En la práctica, esto significa que el modelo no se arriesga y evalúa la mayoría 
-de las posiciones como estados de empate
-
-Este resultado es coherente si analizamos la arquitectura elegida:
-\begin{itemize}
-    \item \textbf{Pérdida de la forma del tablero}: Al aplanar la matriz de $8 \times 8$ en un vector de 64 elementos, se pierde la información espacial y las relaciones entre las fichas adyacentes. Esto limita la capacidad del modelo para aprender patrones estratégicos complejos.
-    \item \textbf{Capacidad de la red}: Con solo dos capas ocultas y un número limitado de neuronas, la red puede carecer de la complejidad necesaria para capturar las sutilezas del juego de Otelo, especialmente en posiciones intermedias donde la estrategia es crucial.
-\end{itemize}
-
-A pesar de esta limitación, el modelo entrenado puede servir como una primera aproximación para evaluar posiciones de manera rápida: toda la estructura de datos se ha comunicado correctamente,
-el modelo ha entrenado de forma estable y el archivo resultante se ha integrado en tiempo real dentro del algoritmo Minimax.
 
 \section{Pruebas y experimentación}
+\subsection{Estudio de Hiperparámetros y Selección del Modelo}
+Con el objetivo de optimizar la capacidad de generalización del modelo, en la fase de pruebas no se entrenó un único modelo, sino que se realizó un estudio comparativo evaluando
+tres configuraciones distintas de hiperparámetros. 
+
+Para garantizar la reproducibilidad del experimento, se fijaron las semillas de pseudoaleatoriedad (\textit{seed = 42}) en las librerías \texttt{NumPy} y \texttt{TensorFlow}, 
+asegurando que el reparto del 20\% de los datos de prueba fuera idéntico para todos los candidatos. Los tres modelos evaluados, todos con una estructura de 64 y 32 neuronas 
+en sus capas ocultas, fueron los siguientes:
+\begin{itemize}
+    \item \textbf{Modelo A}: Arquitectura base con función de activación \textit{ReLu} y optimizador \textit{SGD} con tasa de aprendizaje de 0.01.
+    \item \textbf{Modelo B}: Mismo optimizador, pero sustituyendo \texit{ReLu} por la función de activación \textit{Sigmoide} en las capas ocultas.
+    \item \textbf{Modelo c}: Arquitectura base (\textit{ReLu}), pero sustituyendo el optimizador clásico por el algoritmo \textit{Adam} con tasa de aprendizaje de 0.001, buscando
+    una convergencia más rápida y estable.
+\end{itemize}
+
+Tras someter a los tres modelos a 50 épocas de entrenamiento, los resultados del error absoluto medio (MAE) sobre el conjunto de validación fueron los siguientes:
+\begin{itemize}
+    \item Modelo A (Base): MAE de 0.9848
+    \item Modelo B (Sigmoide): MAE de 0.9797
+    \item Modeo C (Adam): MAE de 1.0384
+\end{itemize}
+
+El \textbf{Modelo C} experimentó un fenómeno de sobreajuste, con un error de validación superior al de entrenamiento, lo que indica que el optimizador \textit{Adam} no fue capaz 
+de generalizar adecuadamente en este caso. Por otro lado, el \textbf{Modelo B} mostró una ligera mejora respecto al modelo base. No obstante, el error cercano a 1.0 sugiere que
+la red no está aprendiendo patrones significativos y, ante la duda, tiende a predecir la situacion del tablero como un empate (0). Esta limitación está relacionada 
+con el uso de la capa \textit{Flatten}, que no preserva la estructura espacial del tablero, dificultando que la red capture relaciones locales entre las fichas.
+
+Como prueba final para descartar que el error del modelo se debiera a una falta de capacidad paramétrica o a un entrenamiento demasiado corto, se diseñó un experimento 
+límite (Modelo D). Se construyó una topología masiva, incluyendo capas de \textit{BatchNormalization} y \textit{Dropout}, y se extendió el entrenamiento hasta las 500 épocas. 
+Los resultados confirmaron el diagnóstico previo: la red alcanzó 
+un error de entrenamiento bastante mejor que los previos (MAE de 0.7739), pero falló drásticamente en el conjunto de validación, disparando su error hasta 1.0058. Este comportamiento 
+evidencia otro caso de sobreajuste. Al carecer de visión geométrica por el aplanado de los datos, y al tener tanta capacidad de memoria, la red optó por memorizar los tableros 
+exactos del entrenamiento, perdiendo toda capacidad de generalizar reglas estratégicas. 
+
+A pesar de esta limitación, el \textbf{Modelo B} demostró ser la aproximación más estable y fue seleccionado como el modelo definitivo (\texttt{otelo\_B.keras}) para competir en el torneo final.
+
+
 \section{Conclusiones}
 \section{Bibliografía}
 
