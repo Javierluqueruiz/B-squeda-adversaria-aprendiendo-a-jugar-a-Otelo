@@ -11,24 +11,36 @@ from keras.models import load_model
 
 
 class AgenteMinimax: 
-    def __init__(self, jugadorIA, profundidad_maxima):
+    def __init__(self, jugadorIA, profundidad_maxima, usar_red=True):
         self.jugadorIA = jugadorIA
         self.profundidad_maxima = profundidad_maxima
-        self.modelo = load_model("modelos/otelo.keras")
+        if usar_red:
+            self.modelo = load_model("modelos/otelo_B.keras")
+        else: 
+            self.modelo = None
+
 
     def heuristica(self, partida):
+        
+        if self.usar_red:   
 
-        tablero = np.expand_dims(partida.tablero, axis=0)
-        prediccion = self.modelo(tablero, training=False).numpy()
-        nota = prediccion[0][0]
+            tablero = np.expand_dims(partida.tablero, axis=0)
+            prediccion = self.modelo(tablero, training=False).numpy()
+            nota = prediccion[0][0]
 
-        if self.jugadorIA == 1:
-            puntuacion = nota
+            if self.jugadorIA == 1:
+                puntuacion = nota
+            else:
+                puntuacion = -nota
+
+            return puntuacion
         else:
-            puntuacion = -nota
-
-        return puntuacion
-    
+            blancas, negras = partida.calcular_puntuacion()
+            if self.jugadorIA == 1:
+                puntuacion =  blancas - negras
+            else:
+                puntuacion =  negras - blancas
+            return puntuacion
 
     def obtener_mejor_movimiento(self, partida):
         alfa = -float('inf')
