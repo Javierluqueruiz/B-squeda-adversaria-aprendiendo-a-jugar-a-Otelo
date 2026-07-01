@@ -14,7 +14,8 @@ class AgenteMinimax:
     def __init__(self, jugadorIA, profundidad_maxima, usar_red=True):
         self.jugadorIA = jugadorIA
         self.profundidad_maxima = profundidad_maxima
-        if usar_red:
+        self.usar_red = usar_red
+        if self.usar_red:
             self.modelo = load_model("modelos/otelo_B.keras")
         else: 
             self.modelo = None
