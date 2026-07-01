@@ -3,7 +3,18 @@ from otelo import Otelo
 
 import numpy as np
 
-NUM_PARTIDAS = 10
+# --- AÑADIDO: Bloqueo absoluto de aleatoriedad ---
+import random
+import tensorflow as tf
+import os
+
+os.environ['PYTHONHASHSEED'] = '0'
+random.seed(42)         # Congela el random.choice() de tu Minimax Clásico
+np.random.seed(42)      # Congela cualquier operación matricial aleatoria
+tf.random.set_seed(42)  # Congela la inferencia interna de Keras/TensorFlow
+# -------------------------------------------------
+
+NUM_PARTIDAS = 100
 PROFUNDIDAD = 3
 
 def jugar_partida(jugador_red, jugador_clasico):

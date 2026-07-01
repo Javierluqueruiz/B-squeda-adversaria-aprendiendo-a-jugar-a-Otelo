@@ -206,6 +206,24 @@ exactos del entrenamiento, perdiendo toda capacidad de generalizar reglas estrat
 
 A pesar de esta limitación, el \textbf{Modelo B} demostró ser la aproximación más estable y fue seleccionado como el modelo definitivo (\texttt{otelo\_B.keras}) para competir en el torneo final.
 
+\subsection{Torneo Final: IA Clásica vs IA Híbrida}
+Para evaluar empíricamente el impacto de la red neuronal en la toma de decisiones, se diseñó un entorno de pruebas automatizado (\texttt{torneo.py}) donde se enfrentaron dos agentes:
+\begin{itemize}
+    \item \textbf{Agente Clásico}: Implementación de Minimax con poda alfa-beta utilizando la heurística manual de conteo de fichas.
+    \item \textbf{Agente Híbrido}: Implementación de Minimax con poda alfa-beta, pero reemplazando la heurística manual por la red neuronal entrenada (\texttt{otelo\_B.keras}).
+\end{itemize}
+
+Ambos agentes se configuraron con una profundidad máxima de búsqueda de 3 niveles. Para garantizar la equidad del enfrentamiento y mitigar la ventaja del primer movimiento, el torneo 
+constó de 100 partidas consecutivas, garantizando que cada agente jugara 50 partidas con las fichas negras y 50 con las blancas.
+
+Los resultados finales del torneo fueron un total de \textbf{72} victorias para el Agente Clásico, \textbf{23} victorias para el Agente Híbrido y \textbf{5} empates. 
+Este resultado es coherente con el análsis previo: el Agente Clásico utiliza una heurística simple pero efectiva a niveles de profundidad bajos, mientras que el Agente Híbrido sufre
+de la falta de capacidad de generalización de la red neuronal que se comentó en la sección anterior. La red, al carecer de visión espacial, tiende a predecir empates, llevándolo a tomar 
+decisiones inferiores frente a un oponente que evalúa de forma más directa la diferencia de fichas.
+
+Sin embargo, el hecho de que el Agente Híbrido haya logrado 23 victorias y 5 empates frente a un oponente clásico indica que la red neuronal ha aprendido ciertos patrones estratégicos.
+La red neuronal no selecciona movimientos al azar, demostrando el éxito funcional de la integración de Deep Learning en el proceso de toma de decisiones.
+
 
 \section{Conclusiones}
 \section{Bibliografía}
