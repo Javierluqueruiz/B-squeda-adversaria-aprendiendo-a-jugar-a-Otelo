@@ -25,6 +25,7 @@ COLOR_BOTON = (50, 50, 150)
 COLOR_BOTON_HOVER = (70, 70, 180)
 COLOR_PANEL = (40, 40, 40)
 COLOR_TEXTO_TURNO = (255, 215, 0)
+COLOR_PISTA = (60, 180, 60)
 
 # Fuentes
 pygame.font.init()
@@ -67,6 +68,15 @@ def dibujar_tablero(pantalla, juego):
         pygame.draw.line(pantalla, COLOR_LINEAS, (0, i*TAMAÑO_CASILLA), (ANCHO, i*TAMAÑO_CASILLA))
         pygame.draw.line(pantalla, COLOR_LINEAS, (i*TAMAÑO_CASILLA, 0), (i*TAMAÑO_CASILLA, ALTO_TABLERO))
     pygame.draw.line(pantalla, COLOR_LINEAS, (0, ALTO_TABLERO), (ANCHO, ALTO_TABLERO))
+
+    movimientos_validos = juego.obtener_movimientos_validos(juego.jugador_actual)
+    for mov in movimientos_validos:
+        f, c = mov
+        centro_x = c * TAMAÑO_CASILLA + TAMAÑO_CASILLA // 2
+        centro_y = f * TAMAÑO_CASILLA + TAMAÑO_CASILLA // 2
+        pygame.draw.circle(pantalla, COLOR_PISTA, (centro_x, centro_y), 12)
+
+
 
     for f in range(8):
         for c in range(8):
