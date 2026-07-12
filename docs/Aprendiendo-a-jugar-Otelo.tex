@@ -17,6 +17,34 @@
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 
+
+% --- CONFIGURACIÓN DE COLORES PARA EL CÓDIGO ---
+\definecolor{fondoCodigo}{rgb}{0.95,0.95,0.92}
+\definecolor{comentario}{rgb}{0.5,0.5,0.5}
+\definecolor{palabraClave}{rgb}{0.0,0.0,0.8}
+\definecolor{cadena}{rgb}{0.0,0.6,0.0}
+
+\lstdefinestyle{estiloPython}{
+    backgroundcolor=\color{fondoCodigo},   
+    commentstyle=\color{comentario}\itshape,
+    keywordstyle=\color{palabraClave}\bfseries,
+    numberstyle=\tiny\color{comentario},
+    stringstyle=\color{cadena},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=4,
+    frame=lines % Pone dos líneas elegantes arriba y abajo
+}
+\lstset{style=estiloPython}
+
 \begin{document}
 
 \title{Aprendiendo a jugar a Otelo: Agente Inteligente con Búsqueda Adversaria y Deep Learning}
@@ -45,7 +73,7 @@ Inteligencia Artificial, Otelo, Reversi, Minimax, Poda Alfa-Beta, Deep Learning,
 \section{Introducción}
 El desarrollo de agentes inteligentes capaces de tomar decisiones estratégicas en juegos de tablero ha sido uno 
 de los grandes hitos de la Inteligencia Artificial. Inspirado en los éxitos recientes de sistemas basados en 
-aprendizaje profundo, este trabajo explora la combinación de algoritmos de búsqueda clásica con técnicas modernas de redes neuronales.
+aprendizaje profundo, este trabajo explora la combinación de algoritmos de búsqueda clásica con técnicas modernas de redes neuronales.\\
 
 El objetivo principal de este proyecto es construir un agente inteligente para el clásico juego de Otelo (también conocido como Reversi). 
 Específicamente, se aborda la variante del proyecto correspondiente a la convocatoria de julio, la cual requiere la implementación del 
@@ -56,11 +84,11 @@ en un conjunto de datos generado mediante partidas de autojuego.
 \section{Preeliminares}
 \subsection{El juego de Otelo}
 Otelo es un juego de estrategia de suma cero con información perfecta para dos jugadores, el cual se disputa sobre un tablero de $8 \times 8$ casillas, siguiendo el reglamento oficial de la Federación Mundial de Otelo \cite{otelo_rules}. 
-La partida inicializa con una disposición central de cuatro fichas cruzadas (dos blancas y dos negras), cediendo el primer movimiento al jugador con las piezas negras.
+La partida inicializa con una disposición central de cuatro fichas cruzadas (dos blancas y dos negras), cediendo el primer movimiento al jugador con las piezas negras.\\
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.55\columnwidth]{images/otelo-posicioninicial.png}
+    \includegraphics[width=0.5\columnwidth]{images/otelo-posicioninicial.png}
     \caption{Tablero inicial de Otelo con la disposición central de fichas.}
     \label{fig:otelo_board}
 \end{figure}
@@ -81,12 +109,12 @@ marcadas en rojo representan un movimiento ilegal, ya que, aunque estén adyacen
 \end{figure}
 
 Siguiendo con el escenario planteado, supongamos que el jugador de piezas negras decide ejecutar el movimiento válido situado más a la izquierda del tablero. Al colocar su 
-ficha en esa posición, logra atrapar una pieza blanca del oponente contra otra de sus propias fichas negras situadas en el centro.
+ficha en esa posición, logra atrapar una pieza blanca del oponente contra otra de sus propias fichas negras situadas en el centro.\\
 
 Como dicta la regla del flanqueo, esta ficha blanca es capturada y revertida al color negro. El resultado de esta acción se ilustra en la Fig.~\ref{fig:movimiento-ejecutado}. 
 Tras este cambio en el tablero, el turno pasa inmediatamente al jugador de piezas blancas, continuando así el flujo natural de la partida.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.55\columnwidth]{images/resultado-movimiento.png}
     \caption{Estado del tablero tras ejecutar el flanqueo. La ficha blanca capturada cambia a color negro.}
@@ -99,7 +127,7 @@ permanencia hasta el final de la partida. Del mismo modo, limitar la movilidad d
 forzarle a realizar movimientos perjudiciales.
 
 Si en algún momento un jugador carece de movimientos legales que cumplan esta regla de flanqueo, está obligado a pasar su turno. La partida concluye cuando el 
-tablero se llena o ningún jugador puede realizar un movimiento válido, resultando ganador aquel con mayor número de fichas de su color.
+tablero se llena o ningún jugador puede realizar un movimiento válido, resultando ganador aquel con mayor número de fichas de su color.\\
 
 \subsection{Búsqueda Adversaria y Poda Alfa-Beta}
 El desarrollo de un agente capaz de competir en juegos de tablero bidireccionales y de suma cero se fundamenta tradicionalmente en la 
@@ -108,16 +136,16 @@ el algoritmo Minimax constituye la técnica esencial para modelar la toma de dec
 Este enfoque asume que ambos jugadores 
 actúan de forma completamente óptima bajo roles contrapuestos: el agente 
 inteligente adopta el rol de maximizador (MAX), cuyo objetivo es seleccionar el movimiento que maximice su recompensa final, mientras que el oponente 
-actúa como minimizador (MIN), intentando reducir a toda costa el beneficio de MAX.
+actúa como minimizador (MIN), intentando reducir a toda costa el beneficio de MAX.\\
 
 El proceso opera de forma recursiva construyendo un árbol de juego, donde los nodos representan los estados del tablero y las aristas corresponden a los 
 movimientos legales posibles. Los valores de utilidad se calculan desde los nodos terminales (hojas) y se propagan hacia arriba a través de los niveles 
-del árbol: un nodo en un nivel MAX heredará el valor máximo de sus hijos, mientras que un nodo en un nivel MIN heredará el valor mínimo.
+del árbol: un nodo en un nivel MAX heredará el valor máximo de sus hijos, mientras que un nodo en un nivel MIN heredará el valor mínimo.\\
 
 Sin embargo, el espacio de estados de Otelo es masivo, con un factor de ramificación medio elevado. Explorar el árbol completo hasta el final de la partida 
 desde los primeros turnos es computacionalmente inabarcable en tiempo real. Por ello, se implementa una estrategia de búsqueda con corte de profundidad (\textit{cutting-off search}). 
 Al alcanzar un límite preestablecido de niveles (profundidad $d$), la simulación se detiene de manera controlada y se invoca una función heurística de evaluación numérica. Esta 
-función estima de forma estática la calidad de la posición actual del tablero para MAX, sustituyendo el valor de utilidad real del fin de la partida.
+función estima de forma estática la calidad de la posición actual del tablero para MAX, sustituyendo el valor de utilidad real del fin de la partida.\\
 
 Para mitigar el coste computacional y permitir exploraciones más profundas en menores tiempos de respuesta, se integra la optimización de la poda alfa-beta. 
 Esta técnica mantiene el control de los peores escenarios asumibles por cada jugador durante la exploración recursiva mediante dos variables adaptativas:
@@ -134,13 +162,13 @@ en el momento en que se cumple la condición:
 
 Esta desigualdad implica que el jugador actual puede forzar un resultado mejor en otra rama previamente explorada, por lo que el oponente ideal 
 jamás permitiría alcanzar el estado actual. Descartar estas ramas irrelevantes reduce drásticamente el número de nodos evaluados sin alterar en absoluto 
-el movimiento óptimo final que devolvería el algoritmo Minimax puro.
+el movimiento óptimo final que devolvería el algoritmo Minimax puro.\\
 
 Para comprender visualmente este proceso de descarte, la Fig ~\ref{fig:alfa-beta} ilustra el escenario conceptual diseñado para el árbol de decicisión. Como se 
 puede observar, tras evaluar el primer hijo de un nodo MIN y obtener un valor que resulta inferior o igual al valor $\alpha$ asegurado por MAX, se activa inmediatamente 
 el criterio de poda, omitiendo la exploración de los nodos restantes (marcados con un descarte explícito).
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.9\columnwidth]{images/arbol-minimax.png}
     \caption{Ejemplo conceptual de poda alfa-beta en un árbol de búsqueda. Los nodos descartados se marcan con una cruz roja, indicando que no se evaluarán debido a la condición $\alpha \ge \beta$.}
@@ -151,25 +179,32 @@ el criterio de poda, omitiendo la exploración de los nodos restantes (marcados 
 Las redes neuronales artificiales son modelos computacionales inspirados en la estructura y el funcionamiento del cerebro 
 humano, diseñados para aproximar funciones matemáticas complejas a partir de datos empíricos \cite{goodfellow}. En particular, 
 las redes con alimentación hacia adelante (\textit{feedforward neural networks}) se estructuran mediante unidades básicas denominadas neuronas, 
-las cuales se organizan en capas secuenciales (entrada, ocultas y salida) \cite{apuntes_nn}.
+las cuales se organizan en capas secuenciales (entrada, ocultas y salida) \cite{apuntes_nn}.\\
 
 Cada conexión entre neuronas posee un peso numérico asociado que modula la señal transmitida. Durante la fase de aprendizaje, estos pesos 
 se ajustan iterativamente mediante algoritmos de optimización basados en el cálculo del gradiente, buscando minimizar una función de error o 
-pérdida que mide la discrepancia entre la salida real de la red y el valor esperado \cite{apuntes_nn}.
+pérdida que mide la discrepancia entre la salida real de la red y el valor esperado \cite{apuntes_nn}.\\
 
 En el contexto de este proyecto, el Aprendizaje Profundo (\textit{Deep Learning}) se introduce para revolucionar el agente clásico de Minimax. 
 En lugar de depender de una función heurística manual estática (como el simple recuento de fichas), se entrena una red neuronal profunda para 
-evaluar la calidad de los estados intermedios del tablero.
+evaluar la calidad de los estados intermedios del tablero.\\
 
 La red diseñada toma como entrada la representación matricial del tablero de $8 \times 8$ y, tras procesar la información a través de sus capas 
 ocultas mediante funciones de activación no lineales, devuelve un único valor continuo en el intervalo $[-1, 1]$. Esta salida representa la estimación de 
-la posición: un valor cercano a $1$ indica una alta probabilidad de victoria para el jugador activo, mientras que un valor cercano a $-1$ augura una derrota inminente.
+la posición: un valor cercano a $1$ indica una alta probabilidad de victoria para el jugador activo, mientras que un valor cercano a $-1$ augura una derrota inminente.\\
 
 \section{Implementación}
 
-\subsection{Motor del Juego}
+\subsection{Motor del Juego: La clase \texttt{Otelo}}
+El núcleo lógico del proyecto se ha encapsulado en la clase \texttt{Otelo}, desarrollada íntegramente en Python. El diseño de este 
+motor se fundamenta en un principio de responsabilidad única, separando completamente las reglas del juego de la interfaz gráfica y 
+de la inteligencia artificial. Esta arquitectura modular resulta crucial para la posterior fase de autojuego, ya que permite simular miles 
+de partidas en segundo plano sin el coste computacional de renderizar gráficos.\\
+
+\subsubsection{Representación del Estado}
+
 Para la representación del tablero de Otelo se ha seleccionado una matriz bidimensional de $8 \times 8$ elementos utilizando la librería \texttt{NumPy}.
-Esta decisión de diseño responde a la necesidad de gestionar los estados de forma eficiente y preparar los datos para su posterior tratamiento en la fase de Deep Learning.
+Esta decisión de diseño frente a una representación basada en listas responde a la necesidad de gestionar los estados de forma eficiente y preparar los datos para su posterior tratamiento en la fase de Deep Learning.\\
 
 De acuerdo con las especificaciones del enunciado del proyecto, se ha optado por utilizar la siguiente convención numérica para representar los distintos estados de las casillas:
 \begin{itemize}
@@ -178,8 +213,31 @@ De acuerdo con las especificaciones del enunciado del proyecto, se ha optado por
     \item \textbf{2}: Casilla ocupada por una ficha negra.
 \end{itemize}
 
-La lógica de juego se encuentra en la clase \texttt{Otelo}. La validación de los movimientos se realiza mediante la función \texttt{es\_movimiento\_valido}, 
-cuyo funcionamiento se basa en escanear las ocho direcciones posibles desde la casilla seleccionada empleando tuplas de desplazamiento:
+El estado inicial se configura en el constructor de la clase, estableciendo la disposición central cruzada clásica y cediendo el primer turno reglamentario a las piezas negras, tal y como se muestra en el Listado \ref{lst:init}.
+
+\begin{lstlisting}[language=Python, caption={Inicialización del estado del tablero usando NumPy.}, label={lst:init}]
+def __init__(self):
+    # Inicializacion del tablero de Otelo como una matriz de 8x8 con ceros
+    self.tablero = np.zeros((8, 8), dtype=int)
+    
+    # Posicion inicial de las fichas en el tablero
+    self.tablero[3][3] = 1
+    self.tablero[3][4] = 2
+    self.tablero[4][3] = 2
+    self.tablero[4][4] = 1
+    
+    # Inician las fichas negras
+    self.jugador_actual = 2 
+\end{lstlisting}
+
+\subsubsection{Lógica de Juego y Validación de Movimientos}
+El mayor desafío algorítmico del motor radica en la validación de los 
+movimientos (método \texttt{es\_movimiento\_valido(fila, columna, jugador)}). Dado que la mecánica de 
+flanqueo exige evaluar casillas en línea recta, se ha implementado un escaneo 
+vectorial utilizando un conjunto estático de ocho tuplas que representan los 
+desplazamientos espaciales en el tablero (ejes horizontal, vertical y las cuatro 
+diagonales):
+
 \[
 D = \{(0,1), (1,1), (1,0), (1,-1)
 \]
@@ -187,8 +245,26 @@ D = \{(0,1), (1,1), (1,0), (1,-1)
 (0,-1), (-1,-1), (-1,0), (-1,1)\}
 \]
 
-Un movimiento se considera legal si, al recorrer una dirección, se encuentra al menos una ficha del oponente seguida de una ficha propia, sin que haya casillas vacías intermedias ni se 
-salga del tablero. El método \texttt{ejecutar\_movimiento} aprovecha esta lógica para almacenar las coordenadas de las piezas atrapadas y actualiza el tablero en consecuencia, revertiendo las fichas del oponente a las propias.
+Cuando un jugador solicita colocar una ficha en las coordenadas $(f, c)$, el algoritmo 
+primero verifica que la casilla objetivo contenga un $0$, es decir, que esté vacía. 
+Posteriormente, itera sobre cada vector de dirección $\vec{v} \in D$, avanzando paso a paso. Un movimiento se marca 
+como válido si, y solo si, en al menos una dirección se detecta una secuencia 
+ininterrumpida de una o más fichas rivales seguida inmediatamente por una ficha del jugador activo, sin rebasar los límites físicos del tablero definidos por la matriz de $8 \times 8$.
+
+\subsubsection{Transiciones de Estado y Condiciones de Victoria}
+Una vez que la validación confirma la legalidad, el método \texttt{ejecutar\_movimiento(fila, columna, jugador)} 
+aplica la transición del estado. Para ello, reaprovecha la lógica del escaneo direccional 
+para recopilar las coordenadas de todas las piezas atrapadas y procede a mutar sus valores
+en la matriz, invirtiendo su color. Finalmente, actualiza el puntero 
+de \texttt{jugador\_actual}, pasando el turno al siguiente jugador.\\
+
+Para garantizar el correcto desarrollo de la partida y el funcionamiento futuro del 
+algoritmo Minimax, el motor implementa mecanismos precisos de detección de estados 
+terminales. El método \texttt{obtener\_movimientos\_validos(jugador)} explora sistemáticamente 
+las 64 casillas devolviendo una lista de tuplas con los flanqueos legales. Si al evaluar 
+esta función para ambos jugadores el resultado es una lista vacía, el 
+método \texttt{es\_fin\_de\_juego} dictamina el final de la partida, procediendo 
+al recuento numérico de los valores en la matriz para declarar al ganador final.
 
 \subsection{Interfaz Gráfica y Máquina de Estados}
 La interacción con el usuario y la visualización del estado del juego se gestionan en el archivo \texttt{main.py} mediante la API gráfica de \texttt{PyGame}. 
