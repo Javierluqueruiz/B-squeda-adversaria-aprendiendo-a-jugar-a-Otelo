@@ -67,7 +67,13 @@ La partida inicializa con una disposición central de cuatro fichas cruzadas (do
 
 La mecánica central del juego es el \texttt{flanqueo}: un movimiento legal consiste en colocar una ficha en una casilla vacía de forma que, 
 en línea recta (horizontal, vertical o diagonal), una o más piezas del oponente queden atrapadas entre la nueva ficha y otra pieza del 
-jugador activo. Las fichas flanqueadas son capturadas y cambian de color. Si un jugador carece de movimientos legales, está obligado a 
+jugador activo. Las fichas flanqueadas son capturadas y cambian de color. 
+
+Para ilustrar esta mecánica, la Figura \ref{fig:otelo_flanqueo} muestr 
+
+
+
+Si un jugador carece de movimientos legales, está obligado a 
 pasar su turno. La partida concluye cuando el tablero se llena o ningún jugador puede realizar un movimiento válido, resultando ganador 
 aquel con mayor número de fichas de su color.
 
@@ -180,7 +186,7 @@ asegurando que el reparto del 20\% de los datos de prueba fuera idéntico para t
 en sus capas ocultas, fueron los siguientes:
 \begin{itemize}
     \item \textbf{Modelo A}: Arquitectura base con función de activación \textit{ReLu} y optimizador \textit{SGD} con tasa de aprendizaje de 0.01.
-    \item \textbf{Modelo B}: Mismo optimizador, pero sustituyendo \texit{ReLu} por la función de activación \textit{Sigmoide} en las capas ocultas.
+    \item \textbf{Modelo B}: Mismo optimizador, pero sustituyendo \textit{ReLu} por la función de activación \textit{Sigmoide} en las capas ocultas.
     \item \textbf{Modelo c}: Arquitectura base (\textit{ReLu}), pero sustituyendo el optimizador clásico por el algoritmo \textit{Adam} con tasa de aprendizaje de 0.001, buscando
     una convergencia más rápida y estable.
 \end{itemize}
@@ -230,35 +236,7 @@ La red neuronal no selecciona movimientos al azar, demostrando el éxito funcion
 
 \begin{thebibliography}{00}
     \bibitem{russell} S. Russell and P. Norvig, \textit{Artificial Intelligence: A Modern Approach}, 4th ed., Pearson, 2020, ch. 5, ``Adversarial Search''.
-
-\end{thebibliography}
-
-
-
-\section*{References}
-
-Please number citations consecutively within brackets \cite{b1}. The 
-sentence punctuation follows the bracket \cite{b2}. Refer simply to the reference 
-number, as in \cite{b3}---do not use ``Ref. \cite{b3}'' or ``reference \cite{b3}'' except at 
-the beginning of a sentence: ``Reference \cite{b3} was the first $\ldots$''
-
-Number footnotes separately in superscripts. Place the actual footnote at 
-the bottom of the column in which it was cited. Do not put footnotes in the 
-abstract or reference list. Use letters for table footnotes.
-
-Unless there are six authors or more give all authors' names; do not use 
-``et al.''. Papers that have not been published, even if they have been 
-submitted for publication, should be cited as ``unpublished'' \cite{b4}. Papers 
-that have been accepted for publication should be cited as ``in press'' \cite{b5}. 
-Capitalize only the first word in a paper title, except for proper nouns and 
-element symbols.
-
-For papers published in translation journals, please give the English 
-citation first, followed by the original foreign-language citation \cite{b6}.
-
-\begin{thebibliography}{00}
-\bibitem{otelo_rules} World Othello Federation, ``Othello Rules,'' [Online]. Disponible en: https://www.worldothello.org/about/about-othello/othello-rules\end{thebibliography}
-
+    \bibitem{otelo_rules} World Othello Federation, ``Othello Rules,'' [Online]. Disponible en: https://www.worldothello.org/about/about-othello/othello-rules\end{thebibliography}
 \vspace{12pt}
 \color{red}
 IEEE conference templates contain guidance text for composing and formatting conference papers. Please ensure that all template text is removed from your conference paper prior to submission to the conference. Failure to remove the template text from your paper may result in your paper not being published.
