@@ -54,40 +54,41 @@ def jugar_partida(jugador_red, jugador_clasico):
     else:
         return "EMPATE"
 
+if __name__ == "__main__":
 
-print(f"INICIANDO TORNEO: RED vs CLASICO ({NUM_PARTIDAS} partidas)")
-print(f"Profundidad de búsqueda: {PROFUNDIDAD}")
+    print(f"INICIANDO TORNEO: RED vs CLASICO ({NUM_PARTIDAS} partidas)")
+    print(f"Profundidad de búsqueda: {PROFUNDIDAD}")
 
-victorias_red = 0
-victorias_clasico = 0
-empates = 0
+    victorias_red = 0
+    victorias_clasico = 0
+    empates = 0
 
-for i in range(1, NUM_PARTIDAS + 1):
+    for i in range(1, NUM_PARTIDAS + 1):
 
-    if i <= (NUM_PARTIDAS // 2):
-        jugador_red = 2
-        jugador_clasico = 1
-        print(f"\nPartida {i}: RED (Negras) vs CLASICO (Blancas)")
-    else:
-        jugador_red = 1
-        jugador_clasico = 2
-        print(f"\nPartida {i}: CLASICO (Negras) vs RED (Blancas)")
+        if i <= (NUM_PARTIDAS // 2):
+            jugador_red = 2
+            jugador_clasico = 1
+            print(f"\nPartida {i}: RED (Negras) vs CLASICO (Blancas)")
+        else:
+            jugador_red = 1
+            jugador_clasico = 2
+            print(f"\nPartida {i}: CLASICO (Negras) vs RED (Blancas)")
 
-    resultado = jugar_partida(jugador_red, jugador_clasico)
+        resultado = jugar_partida(jugador_red, jugador_clasico)
 
-    if resultado == "RED":
-        victorias_red += 1
-        print("Resultado: RED gana")
-    elif resultado == "CLASICO":
-        victorias_clasico += 1
-        print("Resultado: CLASICO gana")
-    else:
-        empates += 1
-        print("Resultado: Empate")
+        if resultado == "RED":
+            victorias_red += 1
+            print("Resultado: RED gana")
+        elif resultado == "CLASICO":
+            victorias_clasico += 1
+            print("Resultado: CLASICO gana")
+        else:
+            empates += 1
+            print("Resultado: Empate")
 
 
-print("\nRESULTADOS FINALES DEL TORNEO:")
-print(f"Victorias RED: {victorias_red}")
-print(f"Victorias CLASICO: {victorias_clasico}")
-print(f"Empates: {empates}")
+    print("\nRESULTADOS FINALES DEL TORNEO:")
+    print(f"Victorias RED: {victorias_red}")
+    print(f"Victorias CLASICO: {victorias_clasico}")
+    print(f"Empates: {empates}")
 
