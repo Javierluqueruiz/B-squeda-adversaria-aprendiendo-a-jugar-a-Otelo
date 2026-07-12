@@ -55,7 +55,7 @@ en un conjunto de datos generado mediante partidas de autojuego.
 
 \section{Preeliminares}
 \subsection{El juego de Otelo}
-Otelo es un juego de estrategia de suma cero con información perfecta para dos jugadores, el cual se disputa sobre un tablero de $8 \times 8$ casillas. 
+Otelo es un juego de estrategia de suma cero con información perfecta para dos jugadores, el cual se disputa sobre un tablero de $8 \times 8$ casillas, siguiendo el reglamento oficial de la Federación Mundial de Otelo \cite{otelo_rules}. 
 La partida inicializa con una disposición central de cuatro fichas cruzadas (dos blancas y dos negras), cediendo el primer movimiento al jugador con las piezas negras.
 
 \begin{figure}[htbp]
@@ -102,15 +102,68 @@ Si en algún momento un jugador carece de movimientos legales que cumplan esta r
 tablero se llena o ningún jugador puede realizar un movimiento válido, resultando ganador aquel con mayor número de fichas de su color.
 
 \subsection{Búsqueda Adversaria y Poda Alfa-Beta}
-El algoritmo Minimax es una técnica fundamental en la búsqueda adversaria que modela la toma de decisiones asumiendo que ambos jugadores 
-actuarán de forma óptima: el agente intentará maximizar su puntuación (MAX) mientras que el oponente intentará minimizarla (MIN). Debido a 
-que explorar el árbol de estados completo para Otelo es computacionalmente inabarcable, se implementa una estrategia de profundidad 
-limitada (\textit{cutting-off search}). Al alcanzar dicha profundidad, el algoritmo detiene la simulación y evalúa la calidad del tablero mediante una heurística.
+El desarrollo de un agente capaz de competir en juegos de tablero bidireccionales y de suma cero se fundamenta tradicionalmente en la 
+teoría de la búsqueda adversaria \cite{russell}. En este contexto, 
+el algoritmo Minimax constituye la técnica esencial para modelar la toma de decisiones estratégicas. 
+Este enfoque asume que ambos jugadores 
+actúan de forma completamente óptima bajo roles contrapuestos: el agente 
+inteligente adopta el rol de maximizador (MAX), cuyo objetivo es seleccionar el movimiento que maximice su recompensa final, mientras que el oponente 
+actúa como minimizador (MIN), intentando reducir a toda costa el beneficio de MAX.
 
-Para optimizar aún más los tiempos de respuesta, se aplica la poda alfa-beta. Esta mejora algorítmica mantiene el control de los 
-peores escenarios posibles (los valores $\alpha$ y $\beta$) y descarta matemáticamente aquellas ramas del árbol que no influirán en la 
-decisión final, reduciendo el número de estados evaluados sin alterar la optimalidad del movimiento elegido.
+El proceso opera de forma recursiva construyendo un árbol de juego, donde los nodos representan los estados del tablero y las aristas corresponden a los 
+movimientos legales posibles. Los valores de utilidad se calculan desde los nodos terminales (hojas) y se propagan hacia arriba a través de los niveles 
+del árbol: un nodo en un nivel MAX heredará el valor máximo de sus hijos, mientras que un nodo en un nivel MIN heredará el valor mínimo.
 
+Sin embargo, el espacio de estados de Otelo es masivo, con un factor de ramificación medio elevado. Explorar el árbol completo hasta el final de la partida 
+desde los primeros turnos es computacionalmente inabarcable en tiempo real. Por ello, se implementa una estrategia de búsqueda con corte de profundidad (\textit{cutting-off search}). 
+Al alcanzar un límite preestablecido de niveles (profundidad $d$), la simulación se detiene de manera controlada y se invoca una función heurística de evaluación numérica. Esta 
+función estima de forma estática la calidad de la posición actual del tablero para MAX, sustituyendo el valor de utilidad real del fin de la partida.
+
+Para mitigar el coste computacional y permitir exploraciones más profundas en menores tiempos de respuesta, se integra la optimización de la poda alfa-beta. 
+Esta técnica mantiene el control de los peores escenarios asumibles por cada jugador durante la exploración recursiva mediante dos variables adaptativas:
+\begin{itemize}
+    \item $\alpha$: Representa la mejor opción (el valor más alto) que el jugador MAX ha logrado asegurar hasta el momento a lo largo del camino de búsqueda.
+    \item $\beta$: Representa la mejor opción (el valor más bajo) que el jugador MIN ha conseguido asegurar hasta el momento.
+\end{itemize}
+
+A medida que el algoritmo recorre el árbol en profundidad, actualiza estos valores. La poda (o descarte matemático de ramas) se ejecuta inmediatamente 
+en el momento en que se cumple la condición:
+\begin{equation}
+    \alpha \ge \beta
+\end{equation}
+
+Esta desigualdad implica que el jugador actual puede forzar un resultado mejor en otra rama previamente explorada, por lo que el oponente ideal 
+jamás permitiría alcanzar el estado actual. Descartar estas ramas irrelevantes reduce drásticamente el número de nodos evaluados sin alterar en absoluto 
+el movimiento óptimo final que devolvería el algoritmo Minimax puro.
+
+Para comprender visualmente este proceso de descarte, la Fig ~\ref{fig:alfa-beta} ilustra el escenario conceptual diseñado para el árbol de decicisión. Como se 
+puede observar, tras evaluar el primer hijo de un nodo MIN y obtener un valor que resulta inferior o igual al valor $\alpha$ asegurado por MAX, se activa inmediatamente 
+el criterio de poda, omitiendo la exploración de los nodos restantes (marcados con un descarte explícito).
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\columnwidth]{images/arbol-minimax.png}
+    \caption{Ejemplo conceptual de poda alfa-beta en un árbol de búsqueda. Los nodos descartados se marcan con una cruz roja, indicando que no se evaluarán debido a la condición $\alpha \ge \beta$.}
+    \label{fig:alfa-beta}
+\end{figure}
+
+\subsection{Redes Neuronales y Deep Learning}
+Las redes neuronales artificiales son modelos computacionales inspirados en la estructura y el funcionamiento del cerebro 
+humano, diseñados para aproximar funciones matemáticas complejas a partir de datos empíricos \cite{goodfellow}. En particular, 
+las redes con alimentación hacia adelante (\textit{feedforward neural networks}) se estructuran mediante unidades básicas denominadas neuronas, 
+las cuales se organizan en capas secuenciales (entrada, ocultas y salida) \cite{apuntes_nn}.
+
+Cada conexión entre neuronas posee un peso numérico asociado que modula la señal transmitida. Durante la fase de aprendizaje, estos pesos 
+se ajustan iterativamente mediante algoritmos de optimización basados en el cálculo del gradiente, buscando minimizar una función de error o 
+pérdida que mide la discrepancia entre la salida real de la red y el valor esperado \cite{apuntes_nn}.
+
+En el contexto de este proyecto, el Aprendizaje Profundo (\textit{Deep Learning}) se introduce para revolucionar el agente clásico de Minimax. 
+En lugar de depender de una función heurística manual estática (como el simple recuento de fichas), se entrena una red neuronal profunda para 
+evaluar la calidad de los estados intermedios del tablero.
+
+La red diseñada toma como entrada la representación matricial del tablero de $8 \times 8$ y, tras procesar la información a través de sus capas 
+ocultas mediante funciones de activación no lineales, devuelve un único valor continuo en el intervalo $[-1, 1]$. Esta salida representa la estimación de 
+la posición: un valor cercano a $1$ indica una alta probabilidad de victoria para el jugador activo, mientras que un valor cercano a $-1$ augura una derrota inminente.
 
 \section{Implementación}
 
@@ -260,7 +313,10 @@ La red neuronal no selecciona movimientos al azar, demostrando el éxito funcion
 
 \begin{thebibliography}{00}
     \bibitem{russell} S. Russell and P. Norvig, \textit{Artificial Intelligence: A Modern Approach}, 4th ed., Pearson, 2020, ch. 5, ``Adversarial Search''.
-    \bibitem{otelo_rules} World Othello Federation, ``Othello Rules,'' [Online]. Disponible en: https://www.worldothello.org/about/about-othello/othello-rules\end{thebibliography}
+    \bibitem{otelo_rules} World Othello Federation, ``Othello Rules,'' [Online]. Disponible en: https://www.worldothello.org/about/about-othello/othello-rules
+    \bibitem{goodfellow} I. Goodfellow, Y. Bengio, and A. Courville, \textit{Deep Learning}, MIT Press, 2016.    
+    \bibitem{apuntes_nn} Dpto. de Ciencias de la Computación e Inteligencia Artificial, ``Redes neuronales'', Universidad de Sevilla, Apuntes de la asignatura Inteligencia Artificial, Curso 2025/2026.
+\end{thebibliography}    
 \vspace{12pt}
 \color{red}
 IEEE conference templates contain guidance text for composing and formatting conference papers. Please ensure that all template text is removed from your conference paper prior to submission to the conference. Failure to remove the template text from your paper may result in your paper not being published.
