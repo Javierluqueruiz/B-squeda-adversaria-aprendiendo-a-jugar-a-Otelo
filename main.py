@@ -69,6 +69,15 @@ def dibujar_tablero(pantalla, juego):
         pygame.draw.line(pantalla, COLOR_LINEAS, (i*TAMAÑO_CASILLA, 0), (i*TAMAÑO_CASILLA, ALTO_TABLERO))
     pygame.draw.line(pantalla, COLOR_LINEAS, (0, ALTO_TABLERO), (ANCHO, ALTO_TABLERO))
 
+    movimientos_validos = juego.obtener_movimientos_validos(juego.jugador_actual)
+    for mov in movimientos_validos:
+        f, c = mov
+        centro_x = c * TAMAÑO_CASILLA + TAMAÑO_CASILLA // 2
+        centro_y = f * TAMAÑO_CASILLA + TAMAÑO_CASILLA // 2
+        pygame.draw.circle(pantalla, COLOR_PISTA, (centro_x, centro_y), 12)
+
+
+
     for f in range(8):
         for c in range(8):
             centro_x = c * TAMAÑO_CASILLA + TAMAÑO_CASILLA // 2
