@@ -444,48 +444,56 @@ aplicando una división de 80\% para entrenamiento y 20\% para validación.
 \section{Pruebas y experimentación}
 \subsection{Estudio de Hiperparámetros y Selección del Modelo}
 Con el objetivo de optimizar la capacidad de generalización del modelo, en la fase de pruebas no se entrenó un único modelo, sino que se realizó un estudio comparativo evaluando
-tres configuraciones distintas de hiperparámetros. 
+tres configuraciones distintas de hiperparámetros.\\ 
 
-Para garantizar la reproducibilidad del experimento, se fijaron las semillas de pseudoaleatoriedad (\textit{seed = 42}) en las librerías \texttt{NumPy} y \texttt{TensorFlow}, 
-asegurando que el reparto del 20\% de los datos de prueba fuera idéntico para todos los candidatos. Los tres modelos evaluados, todos con una estructura de 64 y 32 neuronas 
-en sus capas ocultas, fueron los siguientes:
+Para garantizar la equidad, se mantuvo la semilla de pseudoaleatoriedad, asegurando que el reparto del 20\% de los datos de prueba fuera idéntico para todos los candidatos. 
+Los tres modelos evaluados, todos con una estructura de 64 y 32 neuronas    en sus capas ocultas, fueron los siguientes:\\
 \begin{itemize}
-    \item \textbf{Modelo A}: Arquitectura base con función de activación \textit{ReLu} y optimizador \textit{SGD} con tasa de aprendizaje de 0.01.
+    \item \textbf{Modelo A (Base)}: Arquitectura base con función de activación \textit{ReLu} y optimizador \textit{SGD} con tasa de aprendizaje de 0.01.
     \item \textbf{Modelo B}: Mismo optimizador, pero sustituyendo \textit{ReLu} por la función de activación \textit{Sigmoide} en las capas ocultas.
     \item \textbf{Modelo c}: Arquitectura base (\textit{ReLu}), pero sustituyendo el optimizador clásico por el algoritmo \textit{Adam} con tasa de aprendizaje de 0.001, buscando
-    una convergencia más rápida y estable.
+    una convergencia más rápida y estable.\\
 \end{itemize}
 
 Tras someter a los tres modelos a 50 épocas de entrenamiento, los resultados del error absoluto medio (MAE) sobre el conjunto de validación fueron los siguientes:
 \begin{itemize}
-    \item Modelo A (Base): MAE de 0.9848
-    \item Modelo B (Sigmoide): MAE de 0.9797
-    \item Modeo C (Adam): MAE de 1.0384
+    \item \textbf{Modelo A (Base)}: MAE de 0.9846.
+    \item \textbf{Modelo B (Sigmoide)}: Logró el mejor rendimiento relativo con un MAE de \textbf{0.9816}.
+    \item \textbf{Modelo C (Adam)}: MAE de 1.003
 \end{itemize}
 
-El \textbf{Modelo C} experimentó un fenómeno de sobreajuste, con un error de validación superior al de entrenamiento, lo que indica que el optimizador \textit{Adam} no fue capaz 
+El \textbf{Modelo C} experimentó un fenómeno de sobreajuste, con un error de validación superior al de entrenamiento (0.9536), lo que indica que el optimizador \textit{Adam} no fue capaz 
 de generalizar adecuadamente en este caso. Por otro lado, el \textbf{Modelo B} mostró una ligera mejora respecto al modelo base. No obstante, el error cercano a 1.0 sugiere que
-la red no está aprendiendo patrones significativos y, ante la duda, tiende a predecir la situacion del tablero como un empate (0). Esta limitación está relacionada 
-con el uso de la capa \textit{Flatten}, que no preserva la estructura espacial del tablero, dificultando que la red capture relaciones locales entre las fichas.
+la red no está aprendiendo patrones significativos y, ante la duda, tiende a predecir la situacion del tablero como un empate (0).\\
 
 Como prueba final para descartar que el error del modelo se debiera a una falta de capacidad paramétrica o a un entrenamiento demasiado corto, se diseñó un experimento 
-límite (Modelo D). Se construyó una topología masiva, incluyendo capas de \textit{BatchNormalization} y \textit{Dropout}, y se extendió el entrenamiento hasta las 500 épocas. 
-Los resultados confirmaron el diagnóstico previo: la red alcanzó 
-un error de entrenamiento bastante mejor que los previos (MAE de 0.7739), pero falló drásticamente en el conjunto de validación, disparando su error hasta 1.0058. Este comportamiento 
+límite (\textbf{Modelo D}). Se construyó una topología masiva con capas densas de 128, 64 y 32 neuronas, incluyendo capas de \textit{BatchNormalization} y \textit{Dropout}, y se extendió el entrenamiento hasta las 500 épocas. \\
+
+Los resultados del Modelo D confirmaron el diagnóstico previo: la red alcanzó 
+un error de entrenamiento bastante mejor que los previos (MAE de 0.8543), pero falló drásticamente en el conjunto de validación, disparando su error hasta 1.0038. Este comportamiento 
 evidencia otro caso de sobreajuste. Al carecer de visión geométrica por el aplanado de los datos, y al tener tanta capacidad de memoria, la red optó por memorizar los tableros 
-exactos del entrenamiento, perdiendo toda capacidad de generalizar reglas estratégicas. 
+exactos del entrenamiento, perdiendo toda capacidad de generalizar reglas estratégicas. \\
+
+El cuello de botella de todas estas arquitecturas reside en la capa de entrada \texttt{Flatten}. Al aplanar la matriz bidimensional de $8 \times 8$ a un vector de 64 elementos, 
+se destruyen por completo las relaciones espaciales y geométricas de las fichas (como diagonales y adyacencias), las cuales son fundamentales para entender la mecánica 
+del \textit{flanqueo}. Esta limitación técnica justifica la necesidad de evolucionar el modelo hacia arquitecturas capaces de procesar información espacial.\\
 
 A pesar de esta limitación, el \textbf{Modelo B} demostró ser la aproximación más estable y fue seleccionado como el modelo definitivo (\texttt{otelo\_B.keras}) para competir en el torneo final.
 
 \subsection{Torneo Final: IA Clásica vs IA Híbrida}
-Para evaluar empíricamente el impacto de la red neuronal en la toma de decisiones, se diseñó un entorno de pruebas automatizado (\texttt{torneo.py}) donde se enfrentaron dos agentes:
+Una vez seleccionado el \textbf{Modelo B} como la red neuronal con mayor capacidad de generalización del estudio empírico, 
+se procedió a evaluar su rendimiento en un entorno de juego real. Para ello, se diseñó un módulo de competición (\texttt{torneo.py}) capaz de enfrentar de forma automatizada 
+a dos agentes diferentes.\\
+
+El objetivo de este experimento es medir empíricamente el impacto de sustituir la heurística manual estática por la red neuronal. Los 
+contendientes configurados fueron:\\
 \begin{itemize}
     \item \textbf{Agente Clásico}: Implementación de Minimax con poda alfa-beta utilizando la heurística manual de conteo de fichas.
-    \item \textbf{Agente Híbrido}: Implementación de Minimax con poda alfa-beta, pero reemplazando la heurística manual por la red neuronal entrenada (\texttt{otelo\_B.keras}).
+    \item \textbf{Agente Híbrido}: Implementación de Minimax con poda alfa-beta, pero reemplazando la heurística manual por la red neuronal entrenada (\texttt{otelo\_B.keras}).\\
 \end{itemize}
 
 Ambos agentes se configuraron con una profundidad máxima de búsqueda de 3 niveles. Para garantizar la equidad del enfrentamiento y mitigar la ventaja del primer movimiento, el torneo 
-constó de 100 partidas consecutivas, garantizando que cada agente jugara 50 partidas con las fichas negras y 50 con las blancas.
+constó de 100 partidas consecutivas, garantizando que cada agente jugara 50 partidas con las fichas negras y 50 con las blancas.\\
 
 Los resultados finales del torneo fueron un total de \textbf{72} victorias para el Agente Clásico, \textbf{23} victorias para el Agente Híbrido y \textbf{5} empates. 
 Este resultado es coherente con el análsis previo: el Agente Clásico utiliza una heurística simple pero efectiva a niveles de profundidad bajos, mientras que el Agente Híbrido sufre
@@ -504,6 +512,7 @@ La red neuronal no selecciona movimientos al azar, demostrando el éxito funcion
     \bibitem{otelo_rules} World Othello Federation, ``Othello Rules,'' [Online]. Disponible en: https://www.worldothello.org/about/about-othello/othello-rules
     \bibitem{goodfellow} I. Goodfellow, Y. Bengio, and A. Courville, \textit{Deep Learning}, MIT Press, 2016.    
     \bibitem{apuntes_nn} Dpto. de Ciencias de la Computación e Inteligencia Artificial, ``Redes neuronales'', Universidad de Sevilla, Apuntes de la asignatura Inteligencia Artificial, Curso 2025/2026.
+    \bibitem{alphago} D. Silver et al., ``Mastering the game of Go with deep neural networks and tree search,'' \textit{Nature}, vol. 529, no. 7587, pp. 484-489, 2016.
 \end{thebibliography}    
 \vspace{12pt}
 \color{red}

@@ -9,7 +9,6 @@ import tensorflow as tf
 import os
 
 os.environ['PYTHONHASHSEED'] = '0'
-random.seed(42)         # Congela el random.choice() de tu Minimax Clásico
 np.random.seed(42)      # Congela cualquier operación matricial aleatoria
 tf.random.set_seed(42)  # Congela la inferencia interna de Keras/TensorFlow
 # -------------------------------------------------
@@ -64,7 +63,7 @@ if __name__ == "__main__":
     empates = 0
 
     for i in range(1, NUM_PARTIDAS + 1):
-
+        random.seed(i) 
         if i <= (NUM_PARTIDAS // 2):
             jugador_red = 2
             jugador_clasico = 1

@@ -22,6 +22,7 @@ print(f"Forma de las etiquetas (Y): {Y.shape}")
 print(f"Conjunto de entrenamiento: {atributos_entrenamiento.shape[0]} tableros"
       f" | Conjunto de prueba: {atributos_prueba.shape[0]} tableros")
 
+# Función para entrenar un modelo de red neuronal con una arquitectura específica y guardar el modelo entrenado en un archivo.
 def entrenar_modelo(nombre_archivo, activacion_oculta, optimizador):
     print(f"Entrenando {nombre_archivo}...")
 
@@ -56,6 +57,9 @@ entrenar_modelo("otelo_A", "relu", SGD(learning_rate=0.01))
 entrenar_modelo("otelo_B", "sigmoid", SGD(learning_rate=0.01))
 entrenar_modelo("otelo_C", "relu", Adam(learning_rate=0.001))
 
+# Red D: Red neuronal con 3 capas ocultas, normalización por lotes y abandono (dropout) para mejorar la generalización. Se utiliza 
+# la función de activación ReLU en las capas ocultas y la función de activación tangente hiperbólica en la capa de salida. El optimizador 
+# utilizado es Adam con una tasa de aprendizaje de 0.0005. Se entrena durante 500 épocas con un tamaño de lote de 256.
 def entrenar_modelo_D(nombre_archivo):
     print(f"Entrenando {nombre_archivo}...")
 

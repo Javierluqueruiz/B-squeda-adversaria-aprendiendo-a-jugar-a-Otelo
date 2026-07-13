@@ -25,6 +25,7 @@ COLOR_BOTON = (50, 50, 150)
 COLOR_BOTON_HOVER = (70, 70, 180)
 COLOR_PANEL = (40, 40, 40)
 COLOR_TEXTO_TURNO = (255, 215, 0)
+COLOR_PISTA = (60, 180, 60)
 
 # Fuentes
 pygame.font.init()
