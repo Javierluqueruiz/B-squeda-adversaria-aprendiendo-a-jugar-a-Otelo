@@ -75,3 +75,29 @@ Para lanzar el juego y enfrentarte a la IA (o jugar Jugador vs Jugador), asegúr
 * **Usuarios de macOS y Linux:**
   ```bash
   python3 -m src.main
+
+
+
+### 4. Herramientas de Desarrollo y Entrenamiento
+
+Si deseas generar nuevos datos, reentrenar los modelos desde cero, o simular torneos analíticos sin interfaz gráfica, puedes ejecutar los módulos correspondientes desde la raíz del proyecto:
+
+* Generar nuevos tableros de autojuego: 
+    ```bash 
+    python -m src.generar_datos
+* Entrenar redes neuronales: 
+    ```bash
+    python -m src.entrenamiento_red
+* Ejecutar torneo de validación: 
+    ```bash
+    python -m src.torneo
+### 5. Ejecución de Pruebas Unitarias
+
+Para verificar la estabilidad del motor y el control de turnos nulos del algoritmo Minimax, puedes lanzar la suite de pruebas automatizada:
+
+* Usuarios de Windows: 
+    ```bash
+    python -m unittest src.test_minimax
+* Usuarios de macOS/Linux: 
+    ```bash
+    python3 -m unittest src.test_minimax
