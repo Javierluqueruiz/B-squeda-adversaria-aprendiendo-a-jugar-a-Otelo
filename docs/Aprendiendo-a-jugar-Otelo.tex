@@ -280,18 +280,39 @@ Estricta. El bucle principal del juego (\textit{Game Loop}) evalúa de forma con
     \item \textbf{\texttt{FIN}}: Estado final que congela el estado del tablero y muestra el resultado de la partida, indicando el ganador o si ha habido un empate, así como el recuento final de fichas. 
 \end{itemize}
 
-\subsection{Agente Inteligente: Minimax con Poda Alfa-Beta}
-Para dotar a la máquina de capacidad de decisión, se ha implementado un agente basado en el algoritmo Minimax complementado con la optimizacion de poda alfa-beta. 
-Dado que el espacio de búsqueda de Otelo es considerablemente grande, el algoritmo se ejecuta con una profundidad limitada. Al alcanzar dicha profundidad, se aplica una función heurística
-de evaluación manual básica, consistente en la diferencia de fichas entre el jugador maximizador y el minimizador. 
+\subsection{Agente Inteligente Clásico: Minimax con Poda Alfa-Beta}
+La capacidad de decisión lógica del sistema se ha encapsulado en la clase \texttt{AgenteMinimax}. Esta entidad implementa el 
+algoritmo de búsqueda adversaria descrito en la Sección II-B, actuando como el jugador maximizador (MAX) que busca asegurar 
+la victoria frente al jugador humano u otro agente (MIN).\\
 
-Durante la implementación del agente, se identificaron y resolvieron dos desafíos arquitectónicos principales para asegurar la robustez del agente:
+La exploración del árbol de estados se gestiona mediante el método recursivo \texttt{\_minimax\_alfa\_beta(partida, profundida, alfa, beta, maximizando)}. Para evitar la 
+corrupción del estado de la partida real durante la simulación de futuros turnos, el agente emplea clonación profunda de objetos 
+(\texttt{copy.deepcopy}) en cada ramificación. Cuando la recursividad alcanza el límite definido por \texttt{profundidad\_maxima}, 
+la simulación se detiene y se evalúa el estado del tablero mediante una función heurística manual. En esta versión clásica, la 
+heurística consiste en calcular la diferencia neta de fichas entre el agente y el oponente, favoreciendo aquellos estados que maximicen el dominio territorial de la IA.\\
+
+Durante la implementación algorítmica, se identificaron y resolvieron dos desafíos arquitectónicos críticos para asegurar la 
+viabilidad del agente:
+
 \begin{itemize}
-    \item \textbf{Gestión de turnos nulos en simulación}: En partidas avanzadas, es posible alcanzar estados donde un jugador no tiene movimientos válidos. Se implementó la lógica
-    recursiva necesaria para que el agente ceda el turno de forma virtual en su árbol de búsqueda, en lugar de evaluar érroneamente esa rama como una derrota inmediata. Esto evita colapsos lógicos y la devolución de jugadas nulas al motor gráfico.
-    \item \textbf{Ruptura del determinismo}: Al depender de una heurística simple de conteo de fichas, el agente podía generar movimientos repetitivos en situaciones de empate heurístico. 
-    Se introdujo un mecanismo de aleatorización en la selección de movimientos cuando múltiples opciones presentaban la misma evaluación. Esta imprevisibilidad es un requisito técnico fundamental para garantizar una generación de datos heterogénea y rica durante la fase de autojuego para el posterior entrenamiento de la red neuronal.
+    \item \textbf{Gestión de turnos nulos en simulación}: En partidas avanzadas de Otelo, es habitual alcanzar estados donde un jugador carece de movimientos válidos. Se 
+    implementó una lógica condicional para detectar listas de movimientos vacías, permitiendo al agente ceder el turno de forma virtual dentro del árbol de búsqueda en lugar 
+    de abortar la ejecución. Para garantizar la robustez frente a estos casos límite (donde la raíz del árbol no tiene hijos), se desarrolló una suite de pruebas 
+    unitarias (\texttt{test\_minimax.py}) basada en la librería \texttt{unittest}. Estos tests inyectan tableros preconfigurados anómalos para certificar que el 
+    agente no entra en bloqueos recursivos, devolviendo comandos de salto de turno de forma segura.\\
+    
+    \item \textbf{Ruptura del determinismo estricto}: Al depender de una heurística discreta basada en el mero recuento de fichas, el agente clásico tendía a 
+    generar patrones de juego repetitivos ante situaciones de empate heurístico. Para solucionarlo, el método \texttt{obtener\_mejor\_movimiento} recopila todos 
+    los movimientos que alcanzan la puntuación máxima (\texttt{max\_eval}) y selecciona uno aleatoriamente mediante \texttt{random.choice}. Esta introducción de 
+    pseudoaleatoriedad es un requisito técnico fundamental para garantizar una exploración heterogénea del espacio de estados, preparando al motor para 
+    la futura fase de generación de datos por autojuego.\\
 \end{itemize}
+
+Cabe destacar que la clase \texttt{AgenteMinimax} ha sido diseñada siguiendo un patrón de estrategia. Mediante el parámetro de inicialización \texttt{usar\_red}, 
+el motor es capaz de alterar dinámicamente su comportamiento, sustituyendo el conteo manual de fichas por inferencias procedentes de un modelo de Deep Learning, cuya 
+concepción se detallará en las secciones posteriores.\\
+
+
 
 \subsection{Generación del Conjunto de Datos mediante Autojuego}
 Para entrenar la red neuronal, es necesario disponer de un conjunto de datos etiquetado que relacione estados del tablero con la calidad de la posición para el jugador activo. 
