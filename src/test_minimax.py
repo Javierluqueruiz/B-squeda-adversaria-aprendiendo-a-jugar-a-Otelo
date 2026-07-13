@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
-from otelo import Otelo
-from minimax import AgenteMinimax
+from src.otelo import Otelo
+from src.minimax import AgenteMinimax
 
 class TestMinimax(unittest.TestCase):
 

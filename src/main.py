@@ -1,12 +1,15 @@
 import os 
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide" # Silencia el saludo de PyGame
 
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import pygame
 import sys
 import random
 import numpy as np
-from otelo import Otelo
-from minimax import AgenteMinimax   
+from src.otelo import Otelo
+from src.minimax import AgenteMinimax   
 
 # Dimensiones
 TAMAÑO_CASILLA = 80
