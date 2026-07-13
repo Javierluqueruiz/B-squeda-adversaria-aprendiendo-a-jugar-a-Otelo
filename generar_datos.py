@@ -67,5 +67,5 @@ print(f"Total de tableros recolectados: {len(tableros_totales)}")
 
 #Guardar en memoria
 
-np.save("datasets/dataset_tableros2.npy", np.array(tableros_totales))
-np.save("datasets/dataset_etiquetas2.npy", np.array(etiquetas_totales))
+np.save("datasets/dataset_tableros.npy", np.array(tableros_totales))
+np.save("datasets/dataset_etiquetas.npy", np.array(etiquetas_totales))

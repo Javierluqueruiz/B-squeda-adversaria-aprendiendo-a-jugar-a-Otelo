@@ -13,6 +13,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[spanish,es-tabla]{babel}
 \usepackage{listings} 
+\usepackage{setspace}
 
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
@@ -81,6 +82,7 @@ algoritmo Minimax con poda alfa-beta para explorar el espacio de decisiones. La 
 funciones heurísticas manuales por una red neuronal profunda, la cual aprenderá a evaluar las posiciones intermedias del tablero basándose 
 en un conjunto de datos generado mediante partidas de autojuego.
 
+\vspace{10cm}
 \section{Preeliminares}
 \subsection{El juego de Otelo}
 Otelo es un juego de estrategia de suma cero con información perfecta para dos jugadores, el cual se disputa sobre un tablero de $8 \times 8$ casillas, siguiendo el reglamento oficial de la Federación Mundial de Otelo \cite{otelo_rules}. 
@@ -336,26 +338,48 @@ Cabe destacar que la clase \texttt{AgenteMinimax} ha sido diseñada siguiendo un
 el motor es capaz de alterar dinámicamente su comportamiento, sustituyendo el conteo manual de fichas por inferencias procedentes de un modelo de Deep Learning, cuya 
 concepción se detallará en las secciones posteriores.\\
 
-
-
 \subsection{Generación del Conjunto de Datos mediante Autojuego}
 Para entrenar la red neuronal, es necesario disponer de un conjunto de datos etiquetado que relacione estados del tablero con la calidad de la posición para el jugador activo. 
-Dado que no existen bases de datos públicas de partidas de Otelo, se ha desarrollado un módulo de autojuego que enfrenta al agente Minimax contra sí mismo.
+Dado que no existen bases de datos públicas de partidas de Otelo, se ha desarrollado un módulo de autojuego (\texttt{generar\_datos.py}) que enfrenta al agente Minimax contra sí mismo.\\
 
-Se diseñó un entorno de simulación aislado de la interfaz gráfica donde dos agentes Minimax compiten entre sí. Durante la ejecución de cada partida, se registran los estados del 
-tablero antes de cada movimiento junto al jugador activo.
+Se diseñó un entorno de simulación aislado de la interfaz gráfica donde dos agentes Minimax (configurados a una profundidad de búsqueda de 3 niveles) compiten entre sí. 
+Durante la ejecución de cada partida, se registran los estados del tablero antes de cada movimiento junto al jugador activo.\\
 
-Una vez finalizada la partida, se determina el ganador y se recorre el historial de estados para etiquetar cada posición con el resultado final desde la perspectiva del jugador activo en ese momento:
+Una vez finalizada la partida, se determina el ganador y se recorre el historial de estados para etiquetar cada posición con el resultado final desde la perspectiva del jugador 
+activo en ese momento:
 \begin{itemize}
-    \item \textbf{+1}: Si el jugador activo ganó la partida.
+    \item \textbf{+1}: Si el jugador activo en ese estado ganó la partida.
     \item \textbf{0}: Si la partida terminó en empate.
-    \item \textbf{-1}: Si el jugador activo perdió la partida.
+    \item \textbf{-1}: Si el jugador activo en ese estado perdió la partida.\\
 \end{itemize}
 
-Aprovechando la aleatoriedad introducida previamente en el agente para romper el determinismo, se simularon 500 partidas completas de forma automatizada, generando una base de 
-datos heterogénea de aproximadamente 30.000 tableros. Para optimizar el rendimiento de lectura durante la fase de entrenamiento, las estructuras de datos se transformaron 
+El Listado \ref{lst:etiquetado} ilustra la implementación algorítmica de este proceso de retropropagación de la recompensa.
+
+\begin{lstlisting}[language=Python, caption={Lógica de etiquetado de estados intermedios basándose en el resultado final.}, label={lst:etiquetado}]
+# Evaluacion del ganador (1: Blancas, 2: Negras, 0: Empate)
+blancas, negras = partida.calcular_puntuacion()
+ganador = 1 if blancas > negras else (2 if negras > blancas else 0)
+
+# Etiquetado del historial temporal
+for estado_tablero, jugador in historia_partida:
+    if ganador == 0:
+        etiqueta = 0
+    elif jugador == ganador:
+        etiqueta = 1
+    else:
+        etiqueta = -1
+
+    tableros_totales.append(estado_tablero)
+    etiquetas_totales.append(etiqueta)
+\end{lstlisting}
+
+\vspace{0.25cm}
+Aprovechando la aleatoriedad introducida previamente en el agente para romper el determinismo, se simularon 1000 partidas completas de forma automatizada, generando una base de 
+datos heterogénea de aproximadamente 60.000 tableros.\\
+
+Para optimizar el rendimiento de lectura durante la fase de entrenamiento de la red neuronal, las estructuras de datos se transformaron 
 en tensores y se exportaron en formato binario nativo (\texttt{.npy}) haciendo uso de la librería \texttt{NumPy}, separando las características 
-de entrada (matrices de estado) de las etiquetas de salida.
+de entrada (matrices de estado de los tableros) de las etiquetas de salida.\\
 
 \subsection{Arquitectura y Entrenamiento de la Red Neuronal}
 Una vez generado el conjunto de datos, se procedió a diseñar, compilar y entrenar una red neuronal profunda para aprender a evaluar las posiciones del tablero. Para ello, se utilizó la
