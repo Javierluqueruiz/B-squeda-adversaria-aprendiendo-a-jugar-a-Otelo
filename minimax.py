@@ -11,7 +11,7 @@ from keras.models import load_model
 
 
 class AgenteMinimax: 
-    def __init__(self, jugadorIA, profundidad_maxima, usar_red=True):
+    def __init__(self, jugadorIA, profundidad_maxima, usar_red=False):
 
         #Inicializar el agente inteligente. 
         self.jugadorIA = jugadorIA # 1 para fichas blancas, 2 para fichas negras

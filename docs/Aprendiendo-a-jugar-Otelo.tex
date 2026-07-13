@@ -295,11 +295,11 @@ Durante la implementación algorítmica, se identificaron y resolvieron dos desa
 viabilidad del agente:
 
 \begin{itemize}
-    \item \textbf{Gestión de turnos nulos en simulación}: En partidas avanzadas de Otelo, es habitual alcanzar estados donde un jugador carece de movimientos válidos. Se 
-    implementó una lógica condicional para detectar listas de movimientos vacías, permitiendo al agente ceder el turno de forma virtual dentro del árbol de búsqueda en lugar 
-    de abortar la ejecución. Para garantizar la robustez frente a estos casos límite (donde la raíz del árbol no tiene hijos), se desarrolló una suite de pruebas 
-    unitarias (\texttt{test\_minimax.py}) basada en la librería \texttt{unittest}. Estos tests inyectan tableros preconfigurados anómalos para certificar que el 
-    agente no entra en bloqueos recursivos, devolviendo comandos de salto de turno de forma segura.\\
+    \item \textbf{Gestión de turnos nulos en simulación}: En partidas avanzadas de Otelo, es habitual alcanzar estados donde un jugador carece 
+    de movimientos válidos. Para solucionar este problema, se implementó una lógica condicional en el flujo recursivo (ver Listado \ref{lst:minimax_pass}). 
+    Si el método \texttt{obtener\_movimientos\_validos} devuelve una lista vacía, el agente no aborta la ejecución; en su lugar, cede el turno de forma virtual 
+    invocando de nuevo a la función con el rol del oponente invertido. Para certificar la estabilidad de esta solución frente a dichos escenarios límite, se 
+    desarrolló una suite de pruebas unitarias (\texttt{test\_minimax.py}) basada en \texttt{unittest}, garantizando la ausencia de bucles infinitos.
     
     \item \textbf{Ruptura del determinismo estricto}: Al depender de una heurística discreta basada en el mero recuento de fichas, el agente clásico tendía a 
     generar patrones de juego repetitivos ante situaciones de empate heurístico. Para solucionarlo, el método \texttt{obtener\_mejor\_movimiento} recopila todos 

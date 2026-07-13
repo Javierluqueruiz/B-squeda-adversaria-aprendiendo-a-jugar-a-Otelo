@@ -6,7 +6,7 @@ import copy
 
 
 #CONFIGURACIÓN
-NUM_PARTIDAS = 500
+NUM_PARTIDAS = 1000
 IA_1 = AgenteMinimax(jugadorIA=1, profundidad_maxima=3)
 IA_2 = AgenteMinimax(jugadorIA=2, profundidad_maxima=3)
 
@@ -67,5 +67,5 @@ print(f"Total de tableros recolectados: {len(tableros_totales)}")
 
 #Guardar en memoria
 
-np.save("datasets/dataset_tableros.npy", np.array(tableros_totales))
-np.save("datasets/dataset_etiquetas.npy", np.array(etiquetas_totales))
+np.save("datasets/dataset_tableros2.npy", np.array(tableros_totales))
+np.save("datasets/dataset_etiquetas2.npy", np.array(etiquetas_totales))
