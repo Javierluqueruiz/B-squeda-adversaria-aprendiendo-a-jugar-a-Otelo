@@ -308,6 +308,30 @@ viabilidad del agente:
     la futura fase de generación de datos por autojuego.\\
 \end{itemize}
 
+\begin{lstlisting}[language=Python, caption={Mecanismo recursivo de Minimax y control de turnos nulos (virtual pass).}, label={lst:minimax_pass}]
+# --- DENTRO DEL METODO _MINIMAX_ALFA_BETA ---
+if es_maximizando:
+    movimientos = partida.obtener_movimientos_validos(self.jugadorIA)
+
+    # Prevencion de bloqueos: si MAX no puede mover, cede el turno a MIN
+    if len(movimientos) == 0:
+        return self._minimax_alfa_beta(partida, profundidad-1, alfa, beta, False)
+        
+    max_eval = -float('inf')
+    for movimiento in movimientos:
+        partida_copia = copy.deepcopy(partida)
+        f, c = movimiento
+        partida_copia.ejecutar_movimiento(f, c, self.jugadorIA)
+        
+        evaluacion = self._minimax_alfa_beta(partida_copia, profundidad - 1, alfa, beta, False)
+        max_eval = max(max_eval, evaluacion)
+        alfa = max(alfa, max_eval)
+        if beta <= alfa:
+            break # Poda Alfa-Beta
+    return max_eval 
+\end{lstlisting}
+
+
 Cabe destacar que la clase \texttt{AgenteMinimax} ha sido diseñada siguiendo un patrón de estrategia. Mediante el parámetro de inicialización \texttt{usar\_red}, 
 el motor es capaz de alterar dinámicamente su comportamiento, sustituyendo el conteo manual de fichas por inferencias procedentes de un modelo de Deep Learning, cuya 
 concepción se detallará en las secciones posteriores.\\
