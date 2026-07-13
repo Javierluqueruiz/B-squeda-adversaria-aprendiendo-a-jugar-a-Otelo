@@ -211,7 +211,7 @@ de partidas en segundo plano sin el coste computacional de renderizar gráficos.
 
 \subsubsection{Representación del Estado}
 
-Para la representación del tablero de Otelo se ha seleccionado una matriz bidimensional de $8 \times 8$ elementos utilizando la librería \texttt{NumPy} \cite{numpy}.
+Para la representación del tablero de Otelo se ha seleccionado una \textbf{matriz bidimensional} de $8 \times 8$ elementos utilizando la librería \texttt{NumPy} \cite{numpy}.
 Esta decisión de diseño frente a una representación basada en listas responde a la necesidad de gestionar los estados de forma eficiente y preparar los datos para su posterior tratamiento en la fase de Deep Learning.\\
 
 De acuerdo con las especificaciones del enunciado del proyecto, se ha optado por utilizar la siguiente convención numérica para representar los distintos estados de las casillas:
@@ -257,7 +257,7 @@ Cuando un jugador solicita colocar una ficha en las coordenadas $(f, c)$, el alg
 primero verifica que la casilla objetivo contenga un $0$, es decir, que esté vacía. 
 Posteriormente, itera sobre cada vector de dirección $\vec{v} \in D$, avanzando paso a paso. Un movimiento se marca 
 como válido si, y solo si, en al menos una dirección se detecta una secuencia 
-ininterrumpida de una o más fichas rivales seguida inmediatamente por una ficha del jugador activo, sin rebasar los límites físicos del tablero definidos por la matriz de $8 \times 8$.
+ininterrumpida de una o más fichas rivales seguida inmediatamente por una ficha del jugador activo, sin rebasar los límites físicos del tablero definidos por la matriz de $8 \times 8$.\\
 
 \subsubsection{Transiciones de Estado y Condiciones de Victoria}
 Una vez que la validación confirma la legalidad, el método \texttt{ejecutar\_movimiento(fila, columna, jugador)} 
@@ -267,8 +267,8 @@ en la matriz, invirtiendo su color. Finalmente, actualiza el puntero
 de \texttt{jugador\_actual}, pasando el turno al siguiente jugador.\\
 
 Para garantizar el correcto desarrollo de la partida y el funcionamiento futuro del 
-algoritmo Minimax, el motor implementa mecanismos precisos de detección de estados 
-terminales. El método \texttt{obtener\_movimientos\_validos(jugador)} explora sistemáticamente 
+algoritmo Minimax, el motor implementa mecanismos precisos de \textbf{detección de estados 
+terminales}. El método \texttt{obtener\_movimientos\_validos(jugador)} explora sistemáticamente 
 las 64 casillas devolviendo una lista de tuplas con los flanqueos legales. Si al evaluar 
 esta función para ambos jugadores el resultado es una lista vacía, el 
 método \texttt{es\_fin\_de\_juego} dictamina el final de la partida, procediendo 
@@ -280,7 +280,7 @@ algoritmo de búsqueda adversaria descrito en la Sección II-B, actuando como el
 la victoria frente al jugador humano u otro agente (MIN).\\
 
 La exploración del árbol de estados se gestiona mediante el método recursivo \texttt{\_minimax\_alfa\_beta(partida, profundida, alfa, beta, maximizando)}. Para evitar la 
-corrupción del estado de la partida real durante la simulación de futuros turnos, el agente emplea clonación profunda de objetos 
+corrupción del estado de la partida real durante la simulación de futuros turnos, el agente emplea \textbf{clonación profunda} de objetos 
 (\texttt{copy.deepcopy}) en cada ramificación. Cuando la recursividad alcanza el límite definido por \texttt{profundidad\_maxima}, 
 la simulación se detiene y se evalúa el estado del tablero mediante una función heurística manual. En esta versión clásica, la 
 heurística consiste en calcular la diferencia neta de fichas entre el agente y el oponente, favoreciendo aquellos estados que maximicen el dominio territorial de la IA.\\
@@ -327,7 +327,7 @@ if es_maximizando:
 
 
 Cabe destacar que la clase \texttt{AgenteMinimax} ha sido diseñada siguiendo un patrón de estrategia. Mediante el parámetro de inicialización \texttt{usar\_red}, 
-el motor es capaz de alterar dinámicamente su comportamiento, sustituyendo el conteo manual de fichas por inferencias procedentes de un modelo de Deep Learning, cuya 
+el motor es capaz de alterar dinámicamente su comportamiento, sustituyendo el conteo manual de fichas por inferencias procedentes de un modelo de \textbf{Deep Learning}, cuya 
 concepción se detallará en las secciones posteriores.\\
 
 \subsection{Generación del Conjunto de Datos mediante Autojuego}
@@ -366,8 +366,8 @@ for estado_tablero, jugador in historia_partida:
 \end{lstlisting}
 
 \vspace{0.25cm}
-Aprovechando la aleatoriedad introducida previamente en el agente para romper el determinismo, se simularon 1000 partidas completas de forma automatizada, generando una base de 
-datos heterogénea de aproximadamente 60.000 tableros.\\
+Aprovechando la aleatoriedad introducida previamente en el agente para romper el determinismo, se simularon \textbf{1000 partidas} completas de forma automatizada, generando una base de 
+datos heterogénea de aproximadamente \textbf{60.000 tableros}.\\
 
 Para optimizar el rendimiento de lectura durante la fase de entrenamiento de la red neuronal, las estructuras de datos se transformaron 
 en tensores y se exportaron en formato binario nativo (\texttt{.npy}) haciendo uso de la librería \texttt{NumPy}, separando las características 
@@ -377,11 +377,11 @@ de entrada (matrices de estado de los tableros) de las etiquetas de salida.\\
 Una vez generado el conjunto de datos mediante autojuego, se procedió a diseñar y entrenar una red neuronal profunda para aprender a evaluar las posiciones del tablero. Para ello, se utilizó la
 interfaz de \texttt{Keras} \cite{keras} sobre el motor \texttt{TensorFlow} \cite{tensorflow}.\\ 
 
-Como paso previo al diseño de la red, se aplicó una técnica de retención de datos. Utilizando la librería \texttt{scikit-learn} \cite{scikit-learn}, el conjunto de datos 
+Como paso previo al diseño de la red, se aplicó una técnica de \textbf{retención de datos}. Utilizando la librería \texttt{scikit-learn} \cite{scikit-learn}, el conjunto de datos 
 global se dividió en un 80\% para el entrenamiento del modelo y un 20\% para validación. Para garantizar la reproducibilidad 
 de los experimentos posteriores, se fijó una semilla de pseudoaleatoriedad (\textit{random\_state = 42}).\\
 
-Para la primera iteración de la inteligencia artificial, denominada como la arquitectura base o \textbf{Modelo A}, se implementó un Perceptrón Multicapa (MLP) mediante 
+Para la primera iteración de la inteligencia artificial, denominada como la arquitectura base o \textbf{Modelo A}, se implementó un Perceptrón Multicapa mediante 
 la clase \texttt{Sequential} de Keras. El diseño arquitectónico se estructuró de la siguiente manera:\\
 
 \begin{itemize}
@@ -429,24 +429,27 @@ entrenar_modelo("otelo_A", "relu", SGD(learning_rate=0.01))
 
 \vspace{0.25 cm}
 Para el proceso de optimización, se seleccionó el algoritmo de Descenso Estocástico por el Gradiente (SGD) con un factor de aprendizaje fijo de 0.01. La función de pérdida elegida fue
-el Error Cuadrático Medio (MSE), evaluada conjuntamente con la métrica del Error Absoluto Medio (MAE). El entrenamiento se llevó a cabo durante 50 épocas con un tamaño de lote de 256 ejemplos, 
-aplicando una división de 80\% para entrenamiento y 20\% para validación. 
-
+el Error Cuadrático Medio (MSE), evaluada conjuntamente con la métrica del Error Absoluto Medio (MAE). El entrenamiento se llevó a cabo durante 50 épocas con un tamaño de lote de 256 ejemplos.
 
 \subsection{\textbf{Interfaz Gráfica y Máquina de Estados Estricta}}
 Para dotar al proyecto de usabilidad y permitir la interacción humana con los agentes inteligentes 
 desarrollados, se construyó una interfaz gráfica bidimensional utilizando la librería \texttt{PyGame} \cite{pygame}. Como orquestador principal del sistema, el archivo \texttt{main.py} no contiene lógica de las reglas del juego, sino que se limita a instanciar y comunicar la clase \texttt{Otelo} con los modelos de inteligencia artificial (\texttt{AgenteMinimax}) y los eventos del usuario.\\
 
 Para evitar el acoplamiento de código y la saturación de condiciones anidadas en el bucle principal, la arquitectura de la aplicación se diseñó siguiendo 
-el patrón de Máquina de Estados Finita Estricta. El flujo de ejecución se rige por una única variable de control (\texttt{estado}) que determina de forma excluyente qué elementos 
+el patrón de \textbf{Máquina de Estados Finita Estricta}. El flujo de ejecución se rige por una única variable de control (\texttt{estado}) que determina de forma excluyente qué elementos 
 se renderizan y cómo se procesan los eventos. Los estados implementados son los siguientes:\\
 
 \begin{itemize}
-    \item \textbf{\texttt{MENU}}: Estado inicial de espera. Permite al usuario seleccionar la modalidad de ejecución global del sistema.
-    \item \textbf{\texttt{CONFIG\_IA}}: Estado de parametrización interactiva. Permite al usuario configurar dinámicamente las propiedades del agente inteligente antes del inicio de la simulación, seleccionando el tipo de heurística (recuento clásico de fichas o inferencia por Deep Learning) y modificando de forma segura la profundidad de búsqueda del árbol Minimax (acotada en un intervalo de 1 a 5 para salvaguardar la estabilidad del hilo de renderizado).
-    \item \textbf{\texttt{JUGANDO}}: Estado de simulación activa. Traduce las coordenadas del ratón a índices de la matriz lógica del motor y solicita inferencias al agente inteligente parametrizado cuando el puntero del turno lo requiere.
-    \item \textbf{\texttt{PASAR\_TURNO}}: Estado de interrupción seguro. Captura la casuística de bloqueos por falta de movimientos legales, forzando una interacción manual del usuario para confirmar la cesión del turno, evitando alteraciones del flujo sin supervisión.
-    \item \textbf{\texttt{FIN}}: Estado de finalización. Congela la recepción de movimientos lógicos y evalúa matemáticamente el tablero de \texttt{NumPy} para proyectar el resultado y el marcador final.
+    \item \textbf{\texttt{MENU}}: Estado inicial de espera. Permite al usuario seleccionar el modo de juego (vs humano o vs IA).
+    \item \textbf{\texttt{CONFIG\_IA}}: Estado de parametrización interactiva. Permite al usuario configurar las 
+    propiedades del agente inteligente aal que se va a enfrentar antes de la partida, seleccionando el tipo de modelo (Minimax clásico o Deep Learning) y modificando de forma segura la profundidad de búsqueda del árbol Minimax (acotada 
+    en un intervalo de 1 a 5 para no comprometer la experiencia de juego).
+    \item \textbf{\texttt{JUGANDO}}: Estado de partida activa. Traduce las coordenadas del ratón a índices de la matriz lógica del motor 
+    y gestiona la interacción con el agente inteligente.
+    \item \textbf{\texttt{PASAR\_TURNO}}: Estado de cesión de turno. Captura la casuística de bloqueos por falta de movimientos 
+    legales, forzando una interacción manual del usuario para confirmar la cesión del turno, evitando alteraciones del flujo sin supervisión.
+    \item \textbf{\texttt{FIN}}: Estado de finalización. Congela la recepción de movimientos lógicos y evalúa matemáticamente 
+    el tablero de \texttt{NumPy} para proyectar el resultado y el marcador final.
 \end{itemize}
 
 A continuación, se ilustra la progresión visual del sistema a través de las transiciones de la máquina de estados. La Fig. \ref{fig:interfaz_menu} muestra las pantallas 
@@ -462,7 +465,7 @@ previas a la simulación, donde se gestiona la parametrización del agente.
     \label{fig:interfaz_menu}
 \end{figure}
 
-Por otro lado, la Fig. \ref{fig:interfaz_juego} representa los estados activos del motor, mostrando la representación gráfica del tablero de $8 \times 8$, el panel de información en tiempo real y la pantalla de evaluación determinista una vez alcanzada la condición de fin de juego.
+Por otro lado, la Fig. \ref{fig:interfaz_juego} representa los estados activos del motor, mostrando la representación gráfica del tablero de $8 \times 8$, el panel de información en tiempo real y la pantalla con el resultado final una vez alcanzada la condición de victoria.
 
 \begin{figure}[H]
     \centering
@@ -478,14 +481,14 @@ Por otro lado, la Fig. \ref{fig:interfaz_juego} representa los estados activos d
 \section{Pruebas y experimentación}
 \subsection{Estudio de Hiperparámetros y Selección del Modelo}
 Con el objetivo de optimizar la capacidad de generalización del modelo, en la fase de pruebas no se entrenó un único modelo, sino que se realizó un estudio comparativo evaluando
-tres configuraciones distintas de hiperparámetros.\\ 
+tres \textbf{configuraciones distintas de hiperparámetros}.\\ 
 
 Para garantizar la equidad, se mantuvo la semilla de pseudoaleatoriedad, asegurando que el reparto del 20\% de los datos de prueba fuera idéntico para todos los candidatos. 
 Los tres modelos evaluados, todos con una estructura de 64 y 32 neuronas    en sus capas ocultas, fueron los siguientes:\\
 \begin{itemize}
     \item \textbf{Modelo A (Base)}: Arquitectura base con función de activación \textit{ReLu} y optimizador \textit{SGD} con tasa de aprendizaje de 0.01.
     \item \textbf{Modelo B}: Mismo optimizador, pero sustituyendo \textit{ReLu} por la función de activación \textit{Sigmoide} en las capas ocultas.
-    \item \textbf{Modelo c}: Arquitectura base (\textit{ReLu}), pero sustituyendo el optimizador clásico por el algoritmo \textit{Adam} con tasa de aprendizaje de 0.001, buscando
+    \item \textbf{Modelo C}: Arquitectura base (\textit{ReLu}), pero sustituyendo el optimizador clásico por el algoritmo \textit{Adam} con tasa de aprendizaje de 0.001, buscando
     una convergencia más rápida y estable.\\
 \end{itemize}
 
@@ -493,10 +496,10 @@ Tras someter a los tres modelos a 50 épocas de entrenamiento, los resultados de
 \begin{itemize}
     \item \textbf{Modelo A (Base)}: MAE de 0.9846.
     \item \textbf{Modelo B (Sigmoide)}: Logró el mejor rendimiento relativo con un MAE de \textbf{0.9816}.
-    \item \textbf{Modelo C (Adam)}: MAE de 1.003
+    \item \textbf{Modelo C (Adam)}: MAE de 1.003\\
 \end{itemize}
 
-El \textbf{Modelo C} experimentó un fenómeno de sobreajuste, con un error de validación superior al de entrenamiento (0.9536), lo que indica que el optimizador \textit{Adam} no fue capaz 
+El \textbf{Modelo C} experimentó un fenómeno de \textbf{sobreajuste}, con un error de validación superior al de entrenamiento (0.9536), lo que indica que el optimizador \textit{Adam} no fue capaz 
 de generalizar adecuadamente en este caso. Por otro lado, el \textbf{Modelo B} mostró una ligera mejora respecto al modelo base. No obstante, el error cercano a 1.0 sugiere que
 la red no está aprendiendo patrones significativos y, ante la duda, tiende a predecir la situacion del tablero como un empate (0).\\
 
@@ -505,7 +508,7 @@ límite (\textbf{Modelo D}). Se construyó una topología masiva con capas densa
 
 Los resultados del Modelo D confirmaron el diagnóstico previo: la red alcanzó 
 un error de entrenamiento bastante mejor que los previos (MAE de 0.8543), pero falló drásticamente en el conjunto de validación, disparando su error hasta 1.0038. Este comportamiento 
-evidencia otro caso de sobreajuste. Al carecer de visión geométrica por el aplanado de los datos, y al tener tanta capacidad de memoria, la red optó por memorizar los tableros 
+evidencia otro caso de \textbf{sobreajuste}. Al carecer de visión geométrica por el aplanado de los datos, y al tener tanta capacidad de memoria, la red optó por memorizar los tableros 
 exactos del entrenamiento, perdiendo toda capacidad de generalizar reglas estratégicas. \\
 
 El cuello de botella de todas estas arquitecturas reside en la capa de entrada \texttt{Flatten}. Al aplanar la matriz bidimensional de $8 \times 8$ a un vector de 64 elementos, 
@@ -531,48 +534,59 @@ constó de 100 partidas consecutivas, garantizando que cada agente jugara 50 par
 
 Los resultados finales del torneo arrojaron un total de \textbf{75} victorias para el Agente Clásico, \textbf{24} victorias para el Agente Híbrido y \textbf{1} empate.
 
+\begin{lstlisting}[language=Python, caption={Resultado del script de evaluación del torneo.}, label={lst:resultado_torneo}]
+RESULTADOS FINALES DEL TORNEO:
+    Victorias RED: 24
+    Victorias CLASICO: 75
+    Empates: 1
+\end{lstlisting}
+
 Este restultado es matemáticamente coherente con el análisis de la función de pérdida realizado en la sección anterior. Al carecer de una topología espacial y presentar un Error Absoluto 
 Medio (MAE) cercano a 1.0, la red neuronal de la IA Híbrida sufre de un alto grado de incertidumbre al evaluar tableros en fases tempranas y medias del juego, convergiendo a 
-menudo hacia predicciones conservadoras. Esto le otorga una desventaja táctica frente al Agente Clásico, cuya heurística manual (maximizar la diferencia de fichas) es determinista, 
+menudo hacia \textbf{predicciones conservadoras}. Esto le otorga una desventaja táctica frente al Agente Clásico, cuya heurística manual (maximizar la diferencia de fichas) es determinista, 
 está exenta de ruido algorítmico y resulta sumamente agresiva a bajas profundidades de exploración.\\
 
-No obstante, el hecho de que el Agente Híbrido haya logrado asegurar 24 victorias, practicamente un cuarto de las partidas, contra un oponente de naturaleza puramente determinista y 
-matemáticamente optimizada constituye un hito fundamental para el proyecto. Este rendimiento demuestra empíricamente que la red neuronal no está seleccionando ramas del árbol 
-de decisión al azar. A pesar de sus limitaciones arquitectónicas, el perceptrón multicapa ha logrado inferir e interiorizar patrones estratégicos basándose exclusivamente en la observación de los datos de autojuego. \\
+No obstante, el hecho de que el Agente Híbrido haya logrado asegurar 24 victorias (prácticamente un cuarto de las partidas) contra un oponente de naturaleza puramente determinista y 
+matemáticamente optimizada constituye un hito fundamental para el proyecto. Este rendimiento demuestra que la red neuronal no está seleccionando ramas del árbol 
+de decisión al azar. A pesar de sus limitaciones arquitectónicas, el perceptrón multicapa ha logrado inferir e interiorizar \textbf{patrones estratégicos} basándose exclusivamente en la observación de los datos de autojuego. \\
 
-En definitiva, estos resultados validan de forma práctica la viabilidad de la hibridación, demostrando que es posible sustituir el conocimiento experto codificado 
+En definitiva, estos resultados validan de forma práctica la \textbf{viabilidad de la hibridación}, demostrando que es posible sustituir el conocimiento experto codificado 
 manualmente por aproximaciones paramétricas basadas en aprendizaje profundo dentro de sistemas de búsqueda adversaria.\\
 
 \section{Conclusiones y Trabajo Futuro}
 
 \subsection{Conclusiones}
-En este proyecto se ha diseñado, implementado y validado un sistema híbrido para el juego de tablero Otelo, logrando integrar con éxito algoritmos de búsqueda 
-adversaria clásica con modelos de aprendizaje profundo supervisado. La arquitectura modular desarrollada ha permitido aislar completamente las reglas del 
+En este proyecto se ha diseñado, implementado y validado un sistema híbrido para el juego de tablero Otelo, logrando integrar con éxito algoritmos de \textbf{búsqueda 
+adversaria clásica} con modelos de \textbf{aprendizaje profundo supervisado}. La arquitectura modular desarrollada ha permitido aislar completamente las reglas del 
 motor de juego de las interfaces gráficas, facilitando tanto la interacción en tiempo real mediante una máquina de estados estricta en \texttt{PyGame} como 
-la ejecución síncrona de simulaciones masivas por consola.
+la ejecución síncrona de simulaciones masivas por consola.\\
 
-A través del estudio empírico de hiperparámetros, se constató que el Perceptrón Multicapa (MLP) presenta limitaciones estructurales severas para aproximar 
+A través del estudio de hiperparámetros, se constató que el Perceptrón Multicapa (MLP) presenta limitaciones estructurales severas para aproximar 
 la función heurística del tablero de Otelo. El uso de la capa de aplanado (\texttt{Flatten}) destruye las relaciones geométricas y de adyacencia de las piezas, provocando un 
-rápido sobreajuste en topologías complejas o un estancamiento en la predicción de empates ante el ruido intrínseco del etiquetado por resultados absolutos. 
+rápido \textbf{sobreajuste en topologías complejas} o un estancamiento en la \textbf{predicción de empates} en topologías simples.\\ 
 
 A pesar de este cuello de botella matemático, la validación en el torneo automatizado demostró la viabilidad práctica del agente híbrido. Lograr un 24\% de victorias 
 contra un oponente Minimax puramente determinista y optimizado certifica que la red neuronal consiguió deducir e interiorizar patrones estratégicos funcionales (como el control de 
 bordes y la protección de esquinas) a partir de la mera observación estadística del autojuego, validando la hipótesis central de la investigación.
 
 \subsection{Trabajo Futuro}
-La culminación de este trabajo abre dos líneas de investigación claras y de gran relevancia en el estado del arte de la Inteligencia Artificial, orientadas a mitigar 
+La culminación de este trabajo abre \textbf{dos líneas de investigación} claras y de gran relevancia en el estado del arte de la Inteligencia Artificial, orientadas a mitigar 
 las limitaciones computacionales y heurísticas identificadas durante el proyecto:
 
 \begin{enumerate}
     \item \textbf{Transición hacia Redes Neuronales Convolucionales (CNN)}: Para solucionar la pérdida de información espacial provocada por el Perceptrón Multicapa, el 
-    siguiente paso natural es tratar el tablero como una imagen bidimensional utilizando capas convolucionales (\texttt{Conv2D}). Al aplicar filtros locales (por ejemplo, 
+    siguiente paso natural es tratar el tablero como una imagen bidimensional utilizando capas convolucionales (\texttt{Conv2D}). Al aplicar \textbf{filtros locales} (por ejemplo, 
     de dimensiones $3 \times 3$), el modelo será capaz de evaluar simultáneamente el estado de una casilla junto a sus ocho vecinas. Esto permitirá abstraer de forma matemática y 
-    geométrica las diagonales y vectores de flanqueo, replicando la metodología estructural que llevó al éxito a sistemas históricos como AlphaGo \cite{goodfellow}.
+    geométrica las diagonales y vectores de flanqueo, replicando la metodología estructural que llevó al éxito a sistemas históricos como AlphaGo \cite{goodfellow}.\\
     
     \item \textbf{Entrenamiento por Refuerzo mediante Autojuego Iterativo}: Para superar el problema de asignación de crédito (\textit{Credit Assignment Problem}) derivado 
-    del ruido en las etiquetas absolutas de los datos de Minimax clásico, se propone implementar un ciclo de aprendizaje iterativo autorregulado. Bajo este enfoque, el mejor 
+    del ruido en las etiquetas absolutas de los datos de Minimax clásico, se propone implementar un ciclo de \textbf{aprendizaje iterativo autorregulado}.\\ 
+    
+    Bajo este enfoque, el mejor 
     modelo de red neuronal obtenido se pondría a competir contra sí mismo en miles de partidas de autojuego en segundo plano. Los estados de estas nuevas partidas, evaluados 
-    con mayor madurez estratégica, se utilizarían como un conjunto de datos refinado para entrenar a una nueva generación de la red. Este proceso iterativo de coevolución, inspirado 
+    con mayor madurez estratégica, se utilizarían como un conjunto de datos refinado para entrenar a una nueva generación de la red.\\ 
+    
+    Este proceso iterativo de coevolución, inspirado 
     en algoritmos modernos de aprendizaje por refuerzo, permitiría al agente descubrir tácticas complejas de forma completamente autónoma y libre de sesgos humanos o heurísticas manuales simplistas.
 \end{enumerate}
 
@@ -585,19 +599,19 @@ un sistema de asistencia y tutorización bajo supervisión constante, aplicándo
 \begin{itemize}
     \item \textbf{Asistencia en Ingeniería del Software y Refactorización}: Resolución de bloqueos técnicos específicos, como la congelación del 
     hilo principal de renderizado en \texttt{PyGame} y la optimización del control de eventos dentro de la Máquina de Estados Finita (FSM). 
-    \textit{Ejemplo de prompt: "Cuando la IA mueve en mi bucle principal de PyGame, el texto de la pantalla desaparece hasta que me vuelve a tocar. ¿Cómo soluciono este problema de refresco?"}
+    \textit{Ejemplo de prompt: "Cuando la IA mueve en mi bucle principal de PyGame, el texto de la pantalla desaparece hasta que me vuelve a tocar. ¿Cómo soluciono este problema de refresco?"}\\
     
     \item \textbf{Análisis Analítico de Hiperparámetros}: Apoyo en la interpretación de los datos de validación arrojados por \texttt{Keras} (MAE y Loss) para 
     diagnosticar fenómenos matemáticos como el sobreajuste (\textit{overfitting}) de la red neuronal. 
-    \textit{Ejemplo de prompt: "He entrenado un modelo denso muy profundo (128-64-32 neuronas) y he obtenido un MAE de entrenamiento de 0.85 pero un MAE de validación de 0.99. ¿Por qué ocurre este comportamiento?"}
+    \textit{Ejemplo de prompt: "He entrenado un modelo denso con las siguientes características: ... y he obtenido un MAE de entrenamiento de 0.85 pero un MAE de validación de 0.99. ¿Por qué ocurre este comportamiento?"}\\
     
     \item \textbf{Formato y Estilo Académico}: Asistencia en la composición tipográfica avanzada mediante \LaTeX, generación de estructuras de tablas y refinamiento del 
     tono académico en apartados teóricos. 
-    \textit{Ejemplo de prompt: "Revisa la redacción de este párrafo sobre las Redes Convolucionales para asegurar que el tono sea adecuado para un artículo de estilo IEEE, sin alterar los datos obtenidos en mi script."}
+    \textit{Ejemplo de prompt: "Revisa la redacción de este párrafo sobre las Redes Convolucionales para asegurar que el tono sea adecuado para un artículo de estilo IEEE, comentándome qué cambios se podrían realizar."}
 \end{itemize}
 
 Cabe destacar que todo el código fuente ejecutable, la orquestación de la arquitectura del proyecto, la ejecución empírica de 
-los torneos, así como las decisiones finales de diseño, son fruto del trabajo intelectual directo y exclusivo del autor de este documento.
+los torneos, así como las decisiones finales de diseño, son fruto del trabajo directo y exclusivo del autor de este documento.
 
 \section{Bibliografía}
 
@@ -612,8 +626,5 @@ los torneos, así como las decisiones finales de diseño, son fruto del trabajo 
     \bibitem{keras} F. Chollet et al., ``Keras,'' 2015. [Online]. Disponible en: https://keras.io
     \bibitem{scikit-learn} F. Pedregosa et al., ``Scikit-learn: Machine Learning in Python,'' \textit{Journal of Machine Learning Research}, vol. 12, pp. 2825--2830, 2011.
 \end{thebibliography}    
-\vspace{12pt}
-\color{red}
-IEEE conference templates contain guidance text for composing and formatting conference papers. Please ensure that all template text is removed from your conference paper prior to submission to the conference. Failure to remove the template text from your paper may result in your paper not being published.
 
 \end{document}
