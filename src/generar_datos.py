@@ -1,5 +1,5 @@
-from src.otelo import Otelo
-from src.minimax import AgenteMinimax
+from otelo import Otelo
+from minimax import AgenteMinimax
 import time
 import numpy as np
 import copy

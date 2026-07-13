@@ -5,8 +5,8 @@ import pygame
 import sys
 import random
 import numpy as np
-from src.otelo import Otelo
-from src.minimax import AgenteMinimax   
+from otelo import Otelo
+from minimax import AgenteMinimax   
 
 # Dimensiones
 TAMAÑO_CASILLA = 80
