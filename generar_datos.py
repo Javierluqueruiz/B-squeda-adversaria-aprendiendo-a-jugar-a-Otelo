@@ -7,8 +7,8 @@ import copy
 
 #CONFIGURACIÓN
 NUM_PARTIDAS = 1000
-IA_1 = AgenteMinimax(jugadorIA=1, profundidad_maxima=3)
-IA_2 = AgenteMinimax(jugadorIA=2, profundidad_maxima=3)
+IA_1 = AgenteMinimax(jugadorIA=1, profundidad_maxima=3) # Agente con fichas blancas
+IA_2 = AgenteMinimax(jugadorIA=2, profundidad_maxima=3) # Agente con fichas negras
 
 #ALMACENAMIENTO
 tableros_totales = []
@@ -33,9 +33,10 @@ for i in range(NUM_PARTIDAS):
         
         if movimiento is not None:
             copia_estado = np.copy(partida.tablero)
-            historia_partida.append((copia_estado, partida.jugador_actual))
+            historia_partida.append((copia_estado, partida.jugador_actual)) # Almacenamos el estado del tablero y el jugador actual antes de ejecutar el movimiento
             f, c, = movimiento
             partida.ejecutar_movimiento(f, c, agente_actual.jugadorIA)
+        # Si no hay movimientos válidos, se pasa el turno al oponente
         else:
             partida.jugador_actual = 1 if agente_actual.jugadorIA == 2 else 2
 
@@ -66,6 +67,5 @@ print(f"\n¡Generación completada en {round(fin_global - inicio_global, 2)} seg
 print(f"Total de tableros recolectados: {len(tableros_totales)}")
 
 #Guardar en memoria
-
 np.save("datasets/dataset_tableros.npy", np.array(tableros_totales))
 np.save("datasets/dataset_etiquetas.npy", np.array(etiquetas_totales))
