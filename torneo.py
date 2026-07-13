@@ -16,6 +16,7 @@ tf.random.set_seed(42)  # Congela la inferencia interna de Keras/TensorFlow
 NUM_PARTIDAS = 100
 PROFUNDIDAD = 3
 
+# Función para jugar una partida entre la red neuronal y el agente clásico, devolviendo el resultado de la partida.
 def jugar_partida(jugador_red, jugador_clasico):
     partida = Otelo()
 
@@ -61,7 +62,8 @@ if __name__ == "__main__":
     victorias_red = 0
     victorias_clasico = 0
     empates = 0
-
+    
+    
     for i in range(1, NUM_PARTIDAS + 1):
         random.seed(i) 
         if i <= (NUM_PARTIDAS // 2):

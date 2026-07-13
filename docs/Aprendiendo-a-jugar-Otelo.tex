@@ -268,20 +268,6 @@ esta función para ambos jugadores el resultado es una lista vacía, el
 método \texttt{es\_fin\_de\_juego} dictamina el final de la partida, procediendo 
 al recuento numérico de los valores en la matriz para declarar al ganador final.
 
-\subsection{Interfaz Gráfica y Máquina de Estados}
-La interacción con el usuario y la visualización del estado del juego se gestionan en el archivo \texttt{main.py} mediante la API gráfica de \texttt{PyGame}. 
-Para evitar el acoplamiento de código y controlar de forma robusta el flujo de la aplicación, se ha diseñado una Arquitectura basada en una Máquina de Estados 
-Estricta. El bucle principal del juego (\textit{Game Loop}) evalúa de forma continua los eventos del sistema y renderiza la interfaz basándose en el estado activo:
-
-\begin{itemize}
-    \item \textbf{\texttt{MENU}}: Pantalla de inicio que presenta el título y el botón para iniciar una nueva partida.
-    \item \textbf{\texttt{JUGANDO}}: Estado activo durante el juego, donde se procesan los movimientos de los jugadores y se actualiza la visualización del tablero. Cuenta con un panel 
-    inferior que muestra información relevante, como el turno actual y el marcador de fichas.
-    \item \textbf{\texttt{PASAR\_TURNO}}: Estado crítico de validación que se activa cuando un jugador no tiene movimientos válidos disponibles, pero la partida continúa. En este estado,
-    se notifica al jugador que está obligado a pasar turno mediante una confirmación explícita.
-    \item \textbf{\texttt{FIN}}: Estado final que congela el estado del tablero y muestra el resultado de la partida, indicando el ganador o si ha habido un empate, así como el recuento final de fichas. 
-\end{itemize}
-
 \subsection{Agente Inteligente Clásico: Minimax con Poda Alfa-Beta}
 La capacidad de decisión lógica del sistema se ha encapsulado en la clase \texttt{AgenteMinimax}. Esta entidad implementa el 
 algoritmo de búsqueda adversaria descrito en la Sección II-B, actuando como el jugador maximizador (MAX) que busca asegurar 
@@ -441,6 +427,48 @@ el Error Cuadrático Medio (MSE), evaluada conjuntamente con la métrica del Err
 aplicando una división de 80\% para entrenamiento y 20\% para validación. 
 
 
+\subsection{\textbf{Interfaz Gráfica y Máquina de Estados Estricta}}
+Para dotar al proyecto de usabilidad y permitir la interacción humana con los agentes inteligentes 
+desarrollados, se construyó una interfaz gráfica bidimensional utilizando la librería \texttt{PyGame} \cite{pygame}. Como orquestador principal del sistema, el archivo \texttt{main.py} no contiene lógica de las reglas del juego, sino que se limita a instanciar y comunicar la clase \texttt{Otelo} con los modelos de inteligencia artificial (\texttt{AgenteMinimax}) y los eventos del usuario.\\
+
+Para evitar el acoplamiento de código y la saturación de condiciones anidadas en el bucle principal, la arquitectura de la aplicación se diseñó siguiendo 
+el patrón de Máquina de Estados Finita Estricta. El flujo de ejecución se rige por una única variable de control (\texttt{estado}) que determina de forma excluyente qué elementos 
+se renderizan y cómo se procesan los eventos. Los estados implementados son los siguientes:\\
+
+\begin{itemize}
+    \item \textbf{\texttt{MENU}}: Estado inicial de espera. Permite al usuario seleccionar la modalidad de ejecución global del sistema.
+    \item \textbf{\texttt{CONFIG\_IA}}: Estado de parametrización interactiva. Permite al usuario configurar dinámicamente las propiedades del agente inteligente antes del inicio de la simulación, seleccionando el tipo de heurística (recuento clásico de fichas o inferencia por Deep Learning) y modificando de forma segura la profundidad de búsqueda del árbol Minimax (acotada en un intervalo de 1 a 5 para salvaguardar la estabilidad del hilo de renderizado).
+    \item \textbf{\texttt{JUGANDO}}: Estado de simulación activa. Traduce las coordenadas del ratón a índices de la matriz lógica del motor y solicita inferencias al agente inteligente parametrizado cuando el puntero del turno lo requiere.
+    \item \textbf{\texttt{PASAR\_TURNO}}: Estado de interrupción seguro. Captura la casuística de bloqueos por falta de movimientos legales, forzando una interacción manual del usuario para confirmar la cesión del turno, evitando alteraciones del flujo sin supervisión.
+    \item \textbf{\texttt{FIN}}: Estado de finalización. Congela la recepción de movimientos lógicos y evalúa matemáticamente el tablero de \texttt{NumPy} para proyectar el resultado y el marcador final.
+\end{itemize}
+
+A continuación, se ilustra la progresión visual del sistema a través de las transiciones de la máquina de estados. La Fig. \ref{fig:interfaz_menu} muestra las pantallas 
+previas a la simulación, donde se gestiona la parametrización del agente.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\columnwidth]{images/menu.png}
+    \vspace{0.2cm}
+    
+    \includegraphics[width=0.85\columnwidth]{images/config.png} 
+    \caption{Estados \texttt{MENU} y \texttt{CONFIG\_IA}: Flujo de inicio y parametrización de la IA.}
+    \label{fig:interfaz_menu}
+\end{figure}
+
+Por otro lado, la Fig. \ref{fig:interfaz_juego} representa los estados activos del motor, mostrando la representación gráfica del tablero de $8 \times 8$, el panel de información en tiempo real y la pantalla de evaluación determinista una vez alcanzada la condición de fin de juego.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\columnwidth]{images/jugando.png} 
+    \vspace{0.2cm}
+    
+    \includegraphics[width=0.85\columnwidth]{images/partida_fin.png} 
+    \caption{Estados \texttt{JUGANDO} y \texttt{FIN}: Renderizado en tiempo real y resolución de la partida.}
+    \label{fig:interfaz_juego}
+\end{figure}
+
+
 \section{Pruebas y experimentación}
 \subsection{Estudio de Hiperparámetros y Selección del Modelo}
 Con el objetivo de optimizar la capacidad de generalización del modelo, en la fase de pruebas no se entrenó un único modelo, sino que se realizó un estudio comparativo evaluando
@@ -495,16 +523,54 @@ contendientes configurados fueron:\\
 Ambos agentes se configuraron con una profundidad máxima de búsqueda de 3 niveles. Para garantizar la equidad del enfrentamiento y mitigar la ventaja del primer movimiento, el torneo 
 constó de 100 partidas consecutivas, garantizando que cada agente jugara 50 partidas con las fichas negras y 50 con las blancas.\\
 
-Los resultados finales del torneo fueron un total de \textbf{72} victorias para el Agente Clásico, \textbf{23} victorias para el Agente Híbrido y \textbf{5} empates. 
-Este resultado es coherente con el análsis previo: el Agente Clásico utiliza una heurística simple pero efectiva a niveles de profundidad bajos, mientras que el Agente Híbrido sufre
-de la falta de capacidad de generalización de la red neuronal que se comentó en la sección anterior. La red, al carecer de visión espacial, tiende a predecir empates, llevándolo a tomar 
-decisiones inferiores frente a un oponente que evalúa de forma más directa la diferencia de fichas.
+Los resultados finales del torneo arrojaron un total de \textbf{75} victorias para el Agente Clásico, \textbf{24} victorias para el Agente Híbrido y \textbf{1} empate.
 
-Sin embargo, el hecho de que el Agente Híbrido haya logrado 23 victorias y 5 empates frente a un oponente clásico indica que la red neuronal ha aprendido ciertos patrones estratégicos.
-La red neuronal no selecciona movimientos al azar, demostrando el éxito funcional de la integración de Deep Learning en el proceso de toma de decisiones.
+Este restultado es matemáticamente coherente con el análisis de la función de pérdida realizado en la sección anterior. Al carecer de una topología espacial y presentar un Error Absoluto 
+Medio (MAE) cercano a 1.0, la red neuronal de la IA Híbrida sufre de un alto grado de incertidumbre al evaluar tableros en fases tempranas y medias del juego, convergiendo a 
+menudo hacia predicciones conservadoras. Esto le otorga una desventaja táctica frente al Agente Clásico, cuya heurística manual (maximizar la diferencia de fichas) es determinista, 
+está exenta de ruido algorítmico y resulta sumamente agresiva a bajas profundidades de exploración.\\
+
+No obstante, el hecho de que el Agente Híbrido haya logrado asegurar 24 victorias, practicamente un cuarto de las partidas, contra un oponente de naturaleza puramente determinista y 
+matemáticamente optimizada constituye un hito fundamental para el proyecto. Este rendimiento demuestra empíricamente que la red neuronal no está seleccionando ramas del árbol 
+de decisión al azar. A pesar de sus limitaciones arquitectónicas, el perceptrón multicapa ha logrado inferir e interiorizar patrones estratégicos basándose exclusivamente en la observación de los datos de autojuego. \\
+
+En definitiva, estos resultados validan de forma práctica la viabilidad de la hibridación, demostrando que es posible sustituir el conocimiento experto codificado 
+manualmente por aproximaciones paramétricas basadas en aprendizaje profundo dentro de sistemas de búsqueda adversaria.\\
+
+\section{Conclusiones y Trabajo Futuro}
+
+\subsection{Conclusiones}
+En este proyecto se ha diseñado, implementado y validado un sistema híbrido para el juego de tablero Otelo, logrando integrar con éxito algoritmos de búsqueda 
+adversaria clásica con modelos de aprendizaje profundo supervisado. La arquitectura modular desarrollada ha permitido aislar completamente las reglas del 
+motor de juego de las interfaces gráficas, facilitando tanto la interacción en tiempo real mediante una máquina de estados estricta en \texttt{PyGame} como 
+la ejecución síncrona de simulaciones masivas por consola.
+
+A través del estudio empírico de hiperparámetros, se constató que el Perceptrón Multicapa (MLP) presenta limitaciones estructurales severas para aproximar 
+la función heurística del tablero de Otelo. El uso de la capa de aplanado (\texttt{Flatten}) destruye las relaciones geométricas y de adyacencia de las piezas, provocando un 
+rápido sobreajuste en topologías complejas o un estancamiento en la predicción de empates ante el ruido intrínseco del etiquetado por resultados absolutos. 
+
+A pesar de este cuello de botella matemático, la validación en el torneo automatizado demostró la viabilidad práctica del agente híbrido. Lograr un 24\% de victorias 
+contra un oponente Minimax puramente determinista y optimizado certifica que la red neuronal consiguió deducir e interiorizar patrones estratégicos funcionales (como el control de 
+bordes y la protección de esquinas) a partir de la mera observación estadística del autojuego, validando la hipótesis central de la investigación.
+
+\subsection{Trabajo Futuro}
+La culminación de este trabajo abre dos líneas de investigación claras y de gran relevancia en el estado del arte de la Inteligencia Artificial, orientadas a mitigar 
+las limitaciones computacionales y heurísticas identificadas durante el proyecto:
+
+\begin{enumerate}
+    \item \textbf{Transición hacia Redes Neuronales Convolucionales (CNN)}: Para solucionar la pérdida de información espacial provocada por el Perceptrón Multicapa, el 
+    siguiente paso natural es tratar el tablero como una imagen bidimensional utilizando capas convolucionales (\texttt{Conv2D}). Al aplicar filtros locales (por ejemplo, 
+    de dimensiones $3 \times 3$), el modelo será capaz de evaluar simultáneamente el estado de una casilla junto a sus ocho vecinas. Esto permitirá abstraer de forma matemática y 
+    geométrica las diagonales y vectores de flanqueo, replicando la metodología estructural que llevó al éxito a sistemas históricos como AlphaGo \cite{goodfellow}.
+    
+    \item \textbf{Entrenamiento por Refuerzo mediante Autojuego Iterativo}: Para superar el problema de asignación de crédito (\textit{Credit Assignment Problem}) derivado 
+    del ruido en las etiquetas absolutas de los datos de Minimax clásico, se propone implementar un ciclo de aprendizaje iterativo autorregulado. Bajo este enfoque, el mejor 
+    modelo de red neuronal obtenido se pondría a competir contra sí mismo en miles de partidas de autojuego en segundo plano. Los estados de estas nuevas partidas, evaluados 
+    con mayor madurez estratégica, se utilizarían como un conjunto de datos refinado para entrenar a una nueva generación de la red. Este proceso iterativo de coevolución, inspirado 
+    en algoritmos modernos de aprendizaje por refuerzo, permitiría al agente descubrir tácticas complejas de forma completamente autónoma y libre de sesgos humanos o heurísticas manuales simplistas.
+\end{enumerate}
 
 
-\section{Conclusiones}
 \section{Bibliografía}
 
 \begin{thebibliography}{00}
@@ -513,6 +579,7 @@ La red neuronal no selecciona movimientos al azar, demostrando el éxito funcion
     \bibitem{goodfellow} I. Goodfellow, Y. Bengio, and A. Courville, \textit{Deep Learning}, MIT Press, 2016.    
     \bibitem{apuntes_nn} Dpto. de Ciencias de la Computación e Inteligencia Artificial, ``Redes neuronales'', Universidad de Sevilla, Apuntes de la asignatura Inteligencia Artificial, Curso 2025/2026.
     \bibitem{alphago} D. Silver et al., ``Mastering the game of Go with deep neural networks and tree search,'' \textit{Nature}, vol. 529, no. 7587, pp. 484-489, 2016.
+    \bibitem{pygame} Pygame Community, ``Pygame: a primer on game programming in Python,'' [Online]. Disponible en: https://www.pygame.org/docs/
 \end{thebibliography}    
 \vspace{12pt}
 \color{red}

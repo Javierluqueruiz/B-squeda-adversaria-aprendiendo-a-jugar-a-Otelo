@@ -6,8 +6,7 @@ import sys
 import random
 import numpy as np
 from otelo import Otelo
-from minimax import AgenteMinimax
-from torneo import jugar_partida
+from minimax import AgenteMinimax   
 
 # Dimensiones
 TAMAÑO_CASILLA = 80
@@ -22,7 +21,7 @@ COLOR_BLANCO = (255, 255, 255)
 COLOR_NEGRO = (0, 0, 0)
 COLOR_LINEAS = COLOR_NEGRO
 COLOR_BOTON = (50, 50, 150)
-COLOR_BOTON_HOVER = (70, 70, 180)
+COLOR_BOTON_HOVER = (100, 170, 255) 
 COLOR_PANEL = (40, 40, 40)
 COLOR_TEXTO_TURNO = (255, 215, 0)
 COLOR_PISTA = (60, 180, 60)
@@ -30,6 +29,7 @@ COLOR_PISTA = (60, 180, 60)
 # Fuentes
 pygame.font.init()
 FUENTE_TITULO = pygame.font.SysFont('Arial', 64, bold=True)
+FUENTE_SUBTITULO = pygame.font.SysFont('Arial', 40, bold=True)
 FUENTE_BOTON = pygame.font.SysFont('Arial', 32, bold=True)
 FUENTE_INFO = pygame.font.SysFont('Arial', 22, bold=True)
 
@@ -53,15 +53,63 @@ def dibujar_menu(pantalla):
     texto_pvia = FUENTE_BOTON.render("Jugar vs IA", True, COLOR_BLANCO)
     pantalla.blit(texto_pvia, texto_pvia.get_rect(center=rect_pvia.center))
 
-    rect_torneo = pygame.Rect(ANCHO // 2 - ancho_boton // 2, ALTO // 2 + 120, ancho_boton, alto_boton)
-    pygame.draw.rect(pantalla, (150, 50, 50), rect_torneo, border_radius=10)
-    texto_torneo = FUENTE_BOTON.render("Torneo IA vs IA", True, COLOR_BLANCO)
-    pantalla.blit(texto_torneo, texto_torneo.get_rect(center=rect_torneo.center))
+    return rect_pvp, rect_pvia
 
-    return rect_pvp, rect_pvia, rect_torneo
+def dibujar_config_ia(pantalla, tipo_ia, profundidad_ia):
+    pantalla.fill(COLOR_FONDO)
+    
+    # Titulo de la pantalla
+    texto_titulo = FUENTE_BOTON.render("CONFIGURAR INTELIGENCIA ARTIFICIAL", True, COLOR_NEGRO)
+    pantalla.blit(texto_titulo, texto_titulo.get_rect(center=(ANCHO // 2, ALTO // 8)))
+    
+    # --- SELECCION DE ALGORITMO ---
+    texto_tipo = FUENTE_BOTON.render("Selecciona el motor de evaluacion:", True, COLOR_BLANCO)
+    pantalla.blit(texto_tipo, (ANCHO // 2 - 260, ALTO // 4 - 10))
+    
+    rect_minimax = pygame.Rect(ANCHO // 2 - 180, ALTO // 4 + 35, 180, 45)
+    rect_red = pygame.Rect(ANCHO // 2 + 20, ALTO // 4 + 35, 180, 45)
+    
+    # Resaltamos con un color diferente (COLOR_BOTON_HOVER) el que este seleccionado activo
+    col_minimax = COLOR_BOTON_HOVER if tipo_ia == "MINIMAX" else COLOR_BOTON
+    col_red = COLOR_BOTON_HOVER if tipo_ia == "RED" else COLOR_BOTON
+    
+    pygame.draw.rect(pantalla, col_minimax, rect_minimax, border_radius=8)
+    pygame.draw.rect(pantalla, col_red, rect_red, border_radius=8)
+    
+    txt_m = FUENTE_INFO.render("Minimax Clasico", True, COLOR_BLANCO)
+    txt_r = FUENTE_INFO.render("Red Neuronal", True, COLOR_BLANCO)
+    pantalla.blit(txt_m, txt_m.get_rect(center=rect_minimax.center))
+    pantalla.blit(txt_r, txt_r.get_rect(center=rect_red.center))
+    
+    # --- SELECCION DE PROFUNDIDAD ---
+    texto_prof = FUENTE_INFO.render(f"Profundidad de busqueda en el arbol: {profundidad_ia}", True, COLOR_BLANCO)
+    pantalla.blit(texto_prof, (ANCHO // 2 - 180, ALTO // 2 - 10))
+    
+    rect_menos = pygame.Rect(ANCHO // 2 - 65, ALTO // 2 + 25, 55, 45)
+    rect_mas = pygame.Rect(ANCHO // 2 + 10, ALTO // 2 + 25, 55, 45)
+    
+    pygame.draw.rect(pantalla, COLOR_BOTON, rect_menos, border_radius=5)
+    pygame.draw.rect(pantalla, COLOR_BOTON, rect_mas, border_radius=5)
+    
+    txt_menos = FUENTE_BOTON.render("-", True, COLOR_BLANCO)
+    txt_mas = FUENTE_BOTON.render("+", True, COLOR_BLANCO)
+    pantalla.blit(txt_menos, txt_menos.get_rect(center=rect_menos.center))
+    pantalla.blit(txt_mas, txt_mas.get_rect(center=rect_mas.center))
+    
+    # --- BOTONES DE ACCION ---
+    rect_iniciar = pygame.Rect(ANCHO // 2 - 110, ALTO // 2 + 120, 220, 55)
+    pygame.draw.rect(pantalla, (50, 150, 50), rect_iniciar, border_radius=10)
+    txt_iniciar = FUENTE_BOTON.render("¡JUGAR!", True, COLOR_BLANCO)
+    pantalla.blit(txt_iniciar, txt_iniciar.get_rect(center=rect_iniciar.center))
+    
+    rect_volver = pygame.Rect(ANCHO // 2 - 110, ALTO // 2 + 195, 220, 40)
+    pygame.draw.rect(pantalla, (150, 50, 50), rect_volver, border_radius=5)
+    txt_volver = FUENTE_INFO.render("Volver al Menu", True, COLOR_BLANCO)
+    pantalla.blit(txt_volver, txt_volver.get_rect(center=rect_volver.center))
+    
+    return rect_minimax, rect_red, rect_menos, rect_mas, rect_iniciar, rect_volver
 
-
-def dibujar_tablero(pantalla, juego):
+def dibujar_tablero(pantalla, juego, modo_juego=None, agente=None):
     pantalla.fill(COLOR_FONDO)
 
     for i in range(8):
@@ -102,6 +150,15 @@ def dibujar_tablero(pantalla, juego):
     rect_turno = texto_turno.get_rect(right=ANCHO - 20, top=ALTO_TABLERO + 25)
     pantalla.blit(texto_turno, rect_turno)
 
+    # --- NUEVO: TEXTO INFORMATIVO DE LA IA ---
+    if modo_juego == "PvIA" and agente is not None:
+        tipo_ia = "Red Neuronal" if agente.usar_red else "Minimax"
+        color_ia = "Blancas (B)" if agente.jugadorIA == 1 else "Negras (N)"
+        
+        texto_ia = FUENTE_INFO.render(f"IA: {tipo_ia} jugando con {color_ia}", True, (180, 200, 255))
+        pantalla.blit(texto_ia, (20, ALTO_TABLERO + 60))
+    # -----------------------------------------
+
     ancho_boton_salir = 100
     alto_boton_salir = 40
     x_boton = ANCHO - ancho_boton_salir - 20
@@ -115,8 +172,8 @@ def dibujar_tablero(pantalla, juego):
 
     return rect_salir
 
-def dibujar_fin_partida(pantalla, partida):
-    dibujar_tablero(pantalla, partida)
+def dibujar_fin_partida(pantalla, partida, modo_juego=None, agente=None):
+    rect_salir = dibujar_tablero(pantalla, partida, modo_juego=modo_juego, agente=agente)
 
     blancas, negras = partida.calcular_puntuacion()
 
@@ -150,8 +207,10 @@ def dibujar_fin_partida(pantalla, partida):
     pantalla.blit(superficie_texto1, rect_texto1)
     pantalla.blit(superficie_texto2, rect_texto2)
 
-def dibujar_pasar_turno(pantalla, partida):
-    dibujar_tablero(pantalla, partida)
+    return rect_salir
+
+def dibujar_pasar_turno(pantalla, partida, modo_juego=None, agente=None):
+    dibujar_tablero(pantalla, partida, modo_juego=modo_juego, agente=agente)
 
     texto1 = "No tienes movimientos." 
     texto2 = "Clic para pasar turno"
@@ -178,42 +237,6 @@ def dibujar_pasar_turno(pantalla, partida):
 
     return rect_boton
 
-def dibujar_torneo(pantalla, partidas, max, v_clasico, v_red, empates):
-    pantalla.fill((20, 20, 30))
-    
-    texto_titulo = FUENTE_TITULO.render("SIMULACIÓN DE TORNEO", True, COLOR_BLANCO)
-    pantalla.blit(texto_titulo, texto_titulo.get_rect(center=(ANCHO // 2, ALTO // 6)))
-
-    texto_c = FUENTE_BOTON.render(f"IA Clásica: {v_clasico}", True, (100, 200, 100))
-    texto_r = FUENTE_BOTON.render(f"IA Red Neuronal: {v_red}", True, (200, 100, 100))
-    texto_e = FUENTE_BOTON.render(f"Empates: {empates}", True, (150, 150, 150))
-
-    pantalla.blit(texto_c, texto_c.get_rect(center=(ANCHO // 2, ALTO // 3)))
-    pantalla.blit(texto_r, texto_r.get_rect(center=(ANCHO // 2, ALTO // 3 + 50)))
-    pantalla.blit(texto_e, texto_e.get_rect(center=(ANCHO // 2, ALTO // 3 + 100)))
-
-    ancho_barra = 400
-    alto_barra = 30
-    rect_fondo_barra = pygame.Rect(ANCHO // 2 - ancho_barra // 2, ALTO // 3 + 150, ancho_barra, alto_barra)
-    pygame.draw.rect(pantalla, (50, 50, 50), rect_fondo_barra, border_radius=5)
-
-    progreso = (partidas / max) * ancho_barra
-    if progreso > 0:
-        rect_progreso = pygame.Rect(ANCHO // 2 - ancho_barra // 2, ALTO // 3 + 150, progreso, alto_barra)
-        pygame.draw.rect(pantalla, (100, 200, 255), rect_progreso, border_radius=5)
-
-    texto_progreso = FUENTE_INFO.render(f"Partidas: {partidas}/{max}", True, COLOR_BLANCO)
-    pantalla.blit(texto_progreso, texto_progreso.get_rect(center=(ANCHO // 2, ALTO // 3 + 150 + alto_barra // 2)))
-
-    rect_salir = None
-    if partidas == max:
-        rect_salir = pygame.Rect(ANCHO // 2 - 100, ALTO // 3 + 220, 200, 50)
-        pygame.draw.rect(pantalla, (200, 50, 50), rect_salir, border_radius=5)
-        texto_salir = FUENTE_BOTON.render("Salir", True, COLOR_BLANCO)
-        pantalla.blit(texto_salir, texto_salir.get_rect(center=rect_salir.center))
-    
-    return rect_salir
-
 
 def main():
     pygame.init()
@@ -227,45 +250,25 @@ def main():
     rect_boton_pasar = None
     rect_boton_salir = None
 
-    #Torneo
-    max_partidas = 100
-    partidas_jugadas = 0
-    v_clasico = 0
-    v_red = 0
-    empates = 0
+    # Variables para la configuracion de la IA
+    tipo_ia_seleccionado = "MINIMAX" 
+    profundidad_ia_seleccionada = 3   
+
 
     corriendo = True
     while corriendo:
 
         if estado == "MENU":
-            rect_pvp, rect_pvia, rect_torneo = dibujar_menu(pantalla)
+            rect_pvp, rect_pvia = dibujar_menu(pantalla)
+        elif estado == "CONFIG_IA":
+            rect_mm, rect_rd, rect_men, rect_ma, rect_ini, rect_vol = dibujar_config_ia(pantalla, tipo_ia_seleccionado, profundidad_ia_seleccionada)
         elif estado == "JUGANDO":
-            rect_boton_salir = dibujar_tablero(pantalla, partida)
+            rect_boton_salir = dibujar_tablero(pantalla, partida, modo_juego=modo_juego, agente=agente)
         elif estado == "PASAR_TURNO":
-            rect_boton_pasar = dibujar_pasar_turno(pantalla, partida)
+            rect_boton_pasar = dibujar_pasar_turno(pantalla, partida, modo_juego=modo_juego, agente=agente)
         elif estado == "FIN":
-            dibujar_fin_partida(pantalla, partida)
-        elif estado == "TORNEO":
-            if partidas_jugadas < max_partidas:
-                if partidas_jugadas < (max_partidas // 2):
-                    jugador_red = 2
-                    jugador_clasico = 1
-                else:
-                    jugador_red = 1
-                    jugador_clasico = 2
+            rect_boton_salir = dibujar_fin_partida(pantalla, partida, modo_juego=modo_juego, agente=agente)
 
-                resultado = jugar_partida(jugador_red, jugador_clasico)
-
-                if resultado == "RED":
-                    v_red += 1
-                elif resultado == "CLASICO":
-                    v_clasico += 1
-                else:
-                    empates += 1
-                
-                partidas_jugadas += 1
-            
-            rect_boton_salir = dibujar_torneo(pantalla, partidas_jugadas, max_partidas, v_clasico, v_red, empates)
         
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
@@ -278,19 +281,8 @@ def main():
                         estado = "JUGANDO"
                         partida = Otelo()
                     elif rect_pvia.collidepoint(evento.pos):
-                        modo_juego="PvIA"
-                        estado="JUGANDO"
-                        partida = Otelo()
-
-                        color_ia = random.choice([1, 2])
-                        agente = AgenteMinimax(jugadorIA=color_ia, profundidad_maxima=3)
-                    
-                    elif rect_torneo.collidepoint(evento.pos):
-                        estado = "TORNEO"
-                        partidas_jugadas = 0
-                        v_clasico = 0
-                        v_red = 0
-                        empates = 0
+                        estado = "CONFIG_IA"
+                  
 
                 elif estado == "JUGANDO":
                     if rect_boton_salir is not None and rect_boton_salir.collidepoint(evento.pos):
@@ -319,13 +311,45 @@ def main():
                         partida.jugador_actual = 1 if partida.jugador_actual == 2 else 2
                         estado = "JUGANDO"
                 
-                elif estado == "TORNEO":
+                elif estado == "FIN":
                     if rect_boton_salir and rect_boton_salir.collidepoint(evento.pos):
                         estado = "MENU"
+                
+                elif estado == "CONFIG_IA":
+                    if rect_mm.collidepoint(evento.pos):
+                        tipo_ia_seleccionado = "MINIMAX"
+                    elif rect_rd.collidepoint(evento.pos):
+                        tipo_ia_seleccionado = "RED"
+                    elif rect_men.collidepoint(evento.pos):
+                        if profundidad_ia_seleccionada > 1:
+                            profundidad_ia_seleccionada -= 1
+                    elif rect_ma.collidepoint(evento.pos):
+                        # Ponemos un tope maximo de 5 para evitar que el algoritmo puro 
+                        # colapse el hilo principal de PyGame debido al coste computacional
+                        if profundidad_ia_seleccionada < 5:
+                            profundidad_ia_seleccionada += 1
+                    elif rect_vol.collidepoint(evento.pos):
+                        estado = "MENU"
+                    elif rect_ini.collidepoint(evento.pos):
+                    # ¡Aqui iniciamos la partida con lo elegido por el usuario!
+                        modo_juego = "PvIA"
+                        estado = "JUGANDO"
+                        partida = Otelo()
+                    
+                        color_ia = random.choice([1, 2])
+                        usar_red = True if tipo_ia_seleccionado == "RED" else False
+                    
+                        # Inyectamos los parametros reales seleccionados por el usuario
+                        agente = AgenteMinimax(
+                            jugadorIA=color_ia, 
+                            profundidad_maxima=profundidad_ia_seleccionada, 
+                            usar_red=usar_red
+                        )
+                
 
         if estado == "JUGANDO" and modo_juego=="PvIA":
             if partida.jugador_actual == agente.jugadorIA:
-                dibujar_tablero(pantalla, partida)
+                dibujar_tablero(pantalla, partida, modo_juego=modo_juego, agente=agente)
                 pygame.display.flip()
                 pygame.time.wait(200)
 
