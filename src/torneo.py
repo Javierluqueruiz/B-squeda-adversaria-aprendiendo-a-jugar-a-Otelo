@@ -1,5 +1,5 @@
-from minimax import AgenteMinimax
-from otelo import Otelo
+from src.minimax import AgenteMinimax
+from src.otelo import Otelo
 
 import numpy as np
 

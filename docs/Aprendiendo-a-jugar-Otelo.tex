@@ -58,13 +58,15 @@ javluqrui@alum.us.es}
 }
 
 \maketitle
+\thispagestyle{plain} 
+\pagestyle{plain}
 
 \begin{abstract}
-En este trabajo se explorará el desarrollo de un agente inteligente para el clásico juego de tablero Otelo (Reversi). 
-El objetivo principal es construir un jugador capaz de tomar decisiones estratégicas mediante la implementación del 
-algoritmo clásico de Minimax con poda alfa-beta para explorar el espacio de decisiones. Adicionalmente, se integrará 
-una red neuronal profunda entrenada mediante autojuego para proporcionar una heurística de evaluación de las posiciones 
-intermedias, reemplazando las funciones de evaluación manuales clásicas.
+En este trabajo se presenta el desarrollo de un agente inteligente para el clásico juego de tablero Otelo (Reversi). El objetivo principal 
+ha sido construir un sistema capaz de tomar decisiones estratégicas mediante la implementación del algoritmo clásico de Minimax con poda 
+alfa-beta para explorar eficientemente el árbol de decisiones. Adicionalmente, se ha integrado una red neuronal profunda entrenada mediante 
+autojuego para proporcionar una heurística de evaluación dinámica de las posiciones intermedias, reemplazando así las funciones de evaluación 
+manuales clásicas y dotando al agente de la capacidad de deducir patrones espaciales.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -72,17 +74,21 @@ Inteligencia Artificial, Otelo, Reversi, Minimax, Poda Alfa-Beta, Deep Learning,
 \end{IEEEkeywords}
 
 \section{Introducción}
-El desarrollo de agentes inteligentes capaces de tomar decisiones estratégicas en juegos de tablero ha sido uno 
-de los grandes hitos de la Inteligencia Artificial. Inspirado en los éxitos recientes de sistemas basados en 
-aprendizaje profundo, este trabajo explora la combinación de algoritmos de búsqueda clásica con técnicas modernas de redes neuronales.\\
+El desarrollo de agentes inteligentes capaces de tomar decisiones estratégicas en juegos de tablero ha sido uno de los grandes hitos históricos 
+de la Inteligencia Artificial. Inspirado en los éxitos recientes de sistemas basados en aprendizaje profundo, este trabajo explora la combinación 
+de algoritmos de búsqueda clásica bidireccional con técnicas modernas de redes neuronales artificiales.\\
 
-El objetivo principal de este proyecto es construir un agente inteligente para el clásico juego de Otelo (también conocido como Reversi). 
-Específicamente, se aborda la variante del proyecto correspondiente a la convocatoria de julio, la cual requiere la implementación del 
-algoritmo Minimax con poda alfa-beta para explorar el espacio de decisiones. La aportación central del sistema consiste en sustituir las 
-funciones heurísticas manuales por una red neuronal profunda, la cual aprenderá a evaluar las posiciones intermedias del tablero basándose 
-en un conjunto de datos generado mediante partidas de autojuego.
+El objetivo principal de este proyecto es construir un agente inteligente altamente competitivo para el clásico juego de Otelo. 
+Específicamente, se aborda el diseño e implementación de un motor lógico eficiente, respaldado por el \textbf{algoritmo Minimax} con optimización de poda alfa-beta 
+para explorar el inmenso espacio de estados del juego. La aportación central del sistema consiste en la hibridación de este algoritmo determinista con 
+modelos paramétricos: se sustituyen las funciones heurísticas manuales por una red neuronal profunda, la cual ha aprendido a evaluar de forma autónoma 
+la viabilidad de los estados intermedios basándose en un conjunto de datos masivo generado mediante técnicas de autojuego.\\
 
-\vspace{10cm}
+El resto del documento se estructura de la siguiente manera: la \textit{Sección II} detalla los fundamentos teóricos del juego y las bases algorítmicas; la 
+\textit{Sección III} describe el diseño arquitectónico y la implementación del motor, el agente y las redes neuronales; la \textit{Sección IV} recoge el análisis 
+empírico y los resultados de los torneos automatizados; finalmente, en las \textit{Secciones V y VI} se exponen las conclusiones obtenidas, posibles líneas 
+de trabajo futuro y el uso de herramientas de asistencia generativa.
+
 \section{Preeliminares}
 \subsection{El juego de Otelo}
 Otelo es un juego de estrategia de suma cero con información perfecta para dos jugadores, el cual se disputa sobre un tablero de $8 \times 8$ casillas, siguiendo el reglamento oficial de la Federación Mundial de Otelo \cite{otelo_rules}. 
@@ -90,14 +96,14 @@ La partida inicializa con una disposición central de cuatro fichas cruzadas (do
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\columnwidth]{images/otelo-posicioninicial.png}
+    \includegraphics[width=0.65\columnwidth]{images/otelo-posicioninicial.png}
     \caption{Tablero inicial de Otelo con la disposición central de fichas.}
     \label{fig:otelo_board}
 \end{figure}
 
-La mecánica central del juego es el \texttt{flanqueo}: un movimiento legal consiste en colocar una ficha en una casilla vacía de forma que, 
+La mecánica central del juego es el \textbf{flanqueo}: un movimiento legal consiste en colocar una ficha en una casilla vacía de forma que, 
 en línea recta (horizontal, vertical o diagonal), una o más piezas del oponente queden atrapadas entre la nueva ficha y otra pieza del 
-jugador activo. Las fichas flanqueadas son capturadas y cambian de color. 
+jugador activo. Las fichas flanqueadas son capturadas y cambian de color. \\
 
 Para ilustrar esta mecánica, la Fig.~ \ref{fig:ejemplo-movimientos} muestra las casillas vacías donde el jugador con fichas negras puede colocar su pieza en el primer 
 turno de la partida. Cada una de estas posiciones permite flanquear al menos una ficha blanca, cumpliendo así con la regla de legalidad del movimiento. Por el contrario, las casillas 
@@ -105,7 +111,7 @@ marcadas en rojo representan un movimiento ilegal, ya que, aunque estén adyacen
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.55\columnwidth]{images/otelo-movimientos-validos.png}
+    \includegraphics[width=0.65\columnwidth]{images/otelo-movimientos-validos.png}
     \caption{Ejemplo de movimientos: flanqueo válido (verde) y movimiento ilegal (rojo).}
     \label{fig:ejemplo-movimientos}
 \end{figure}
@@ -118,22 +124,22 @@ Tras este cambio en el tablero, el turno pasa inmediatamente al jugador de pieza
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.55\columnwidth]{images/resultado-movimiento.png}
+    \includegraphics[width=0.65\columnwidth]{images/resultado-movimiento.png}
     \caption{Estado del tablero tras ejecutar el flanqueo. La ficha blanca capturada cambia a color negro.}
     \label{fig:movimiento-ejecutado}
 \end{figure}
 
-Esta restricción de movimientos obliga a los jugadores a desarrollar estrategias de posicionamiento a largo plazo. En este sentido, el control de las 
+Esta restricción de movimientos obliga a los jugadores a desarrollar \textbf{estrategias de posicionamiento} a largo plazo. En este sentido, el control de las 
 esquinas del tablero resulta vital, ya que una ficha colocada en una de las cuatro esquinas jamás podrá ser flanqueada por el oponente, garantizando su 
 permanencia hasta el final de la partida. Del mismo modo, limitar la movilidad del rival (reduciendo sus opciones legales) es una táctica fundamental para 
-forzarle a realizar movimientos perjudiciales.
+forzarle a realizar movimientos perjudiciales.\\
 
 Si en algún momento un jugador carece de movimientos legales que cumplan esta regla de flanqueo, está obligado a pasar su turno. La partida concluye cuando el 
 tablero se llena o ningún jugador puede realizar un movimiento válido, resultando ganador aquel con mayor número de fichas de su color.\\
 
 \subsection{Búsqueda Adversaria y Poda Alfa-Beta}
 El desarrollo de un agente capaz de competir en juegos de tablero bidireccionales y de suma cero se fundamenta tradicionalmente en la 
-teoría de la búsqueda adversaria \cite{russell}. En este contexto, 
+teoría de la \textbf{búsqueda adversaria} \cite{russell}. En este contexto, 
 el algoritmo Minimax constituye la técnica esencial para modelar la toma de decisiones estratégicas. 
 Este enfoque asume que ambos jugadores 
 actúan de forma completamente óptima bajo roles contrapuestos: el agente 
@@ -145,11 +151,11 @@ movimientos legales posibles. Los valores de utilidad se calculan desde los nodo
 del árbol: un nodo en un nivel MAX heredará el valor máximo de sus hijos, mientras que un nodo en un nivel MIN heredará el valor mínimo.\\
 
 Sin embargo, el espacio de estados de Otelo es masivo, con un factor de ramificación medio elevado. Explorar el árbol completo hasta el final de la partida 
-desde los primeros turnos es computacionalmente inabarcable en tiempo real. Por ello, se implementa una estrategia de búsqueda con corte de profundidad (\textit{cutting-off search}). 
+desde los primeros turnos es computacionalmente inabarcable en tiempo real. Por ello, se implementa una estrategia de búsqueda con \textbf{corte de profundidad} (\textit{cutting-off search}). 
 Al alcanzar un límite preestablecido de niveles (profundidad $d$), la simulación se detiene de manera controlada y se invoca una función heurística de evaluación numérica. Esta 
 función estima de forma estática la calidad de la posición actual del tablero para MAX, sustituyendo el valor de utilidad real del fin de la partida.\\
 
-Para mitigar el coste computacional y permitir exploraciones más profundas en menores tiempos de respuesta, se integra la optimización de la poda alfa-beta. 
+Para mitigar el coste computacional y permitir exploraciones más profundas en menores tiempos de respuesta, se integra la optimización de la \textbf{poda alfa-beta}. 
 Esta técnica mantiene el control de los peores escenarios asumibles por cada jugador durante la exploración recursiva mediante dos variables adaptativas:
 \begin{itemize}
     \item $\alpha$: Representa la mejor opción (el valor más alto) que el jugador MAX ha logrado asegurar hasta el momento a lo largo del camino de búsqueda.
@@ -180,14 +186,14 @@ el criterio de poda, omitiendo la exploración de los nodos restantes (marcados 
 \subsection{Redes Neuronales y Deep Learning}
 Las redes neuronales artificiales son modelos computacionales inspirados en la estructura y el funcionamiento del cerebro 
 humano, diseñados para aproximar funciones matemáticas complejas a partir de datos empíricos \cite{goodfellow}. En particular, 
-las redes con alimentación hacia adelante (\textit{feedforward neural networks}) se estructuran mediante unidades básicas denominadas neuronas, 
+las redes con alimentación hacia adelante (\textit{feedforward neural networks}) se estructuran mediante unidades básicas denominadas \textbf{neuronas}, 
 las cuales se organizan en capas secuenciales (entrada, ocultas y salida) \cite{apuntes_nn}.\\
 
 Cada conexión entre neuronas posee un peso numérico asociado que modula la señal transmitida. Durante la fase de aprendizaje, estos pesos 
 se ajustan iterativamente mediante algoritmos de optimización basados en el cálculo del gradiente, buscando minimizar una función de error o 
 pérdida que mide la discrepancia entre la salida real de la red y el valor esperado \cite{apuntes_nn}.\\
 
-En el contexto de este proyecto, el Aprendizaje Profundo (\textit{Deep Learning}) se introduce como una evolución del agente clásico de Minimax. 
+En el contexto de este proyecto, el Aprendizaje Profundo (\textit{Deep Learning}) se introduce como una \textbf{evolución del agente clásico de Minimax}. 
 En lugar de depender de una función heurística manual estática (como el simple recuento de fichas), se entrena una red neuronal profunda para 
 evaluar la calidad de los estados intermedios del tablero y ofrecer una estimación más flexible de la posición.\\
 
@@ -205,7 +211,7 @@ de partidas en segundo plano sin el coste computacional de renderizar gráficos.
 
 \subsubsection{Representación del Estado}
 
-Para la representación del tablero de Otelo se ha seleccionado una matriz bidimensional de $8 \times 8$ elementos utilizando la librería \texttt{NumPy}.
+Para la representación del tablero de Otelo se ha seleccionado una matriz bidimensional de $8 \times 8$ elementos utilizando la librería \texttt{NumPy} \cite{numpy}.
 Esta decisión de diseño frente a una representación basada en listas responde a la necesidad de gestionar los estados de forma eficiente y preparar los datos para su posterior tratamiento en la fase de Deep Learning.\\
 
 De acuerdo con las especificaciones del enunciado del proyecto, se ha optado por utilizar la siguiente convención numérica para representar los distintos estados de las casillas:
@@ -369,9 +375,9 @@ de entrada (matrices de estado de los tableros) de las etiquetas de salida.\\
 
 \subsection{Arquitectura Base y Entrenamiento de la Red Neuronal}
 Una vez generado el conjunto de datos mediante autojuego, se procedió a diseñar y entrenar una red neuronal profunda para aprender a evaluar las posiciones del tablero. Para ello, se utilizó la
-interfaz de \texttt{Keras} sobre el motor \texttt{TensorFlow}.\\ 
+interfaz de \texttt{Keras} \cite{keras} sobre el motor \texttt{TensorFlow} \cite{tensorflow}.\\ 
 
-Como paso previo al diseño de la red, se aplicó una técnica de retención de datos. Utilizando la librería \texttt{scikit-learn}, el conjunto de datos 
+Como paso previo al diseño de la red, se aplicó una técnica de retención de datos. Utilizando la librería \texttt{scikit-learn} \cite{scikit-learn}, el conjunto de datos 
 global se dividió en un 80\% para el entrenamiento del modelo y un 20\% para validación. Para garantizar la reproducibilidad 
 de los experimentos posteriores, se fijó una semilla de pseudoaleatoriedad (\textit{random\_state = 42}).\\
 
@@ -571,6 +577,28 @@ las limitaciones computacionales y heurísticas identificadas durante el proyect
 \end{enumerate}
 
 
+\section{Uso de Inteligencia Artificial Generativa}
+En cumplimiento con las directrices académicas sobre integridad y transparencia, se declara el uso de herramientas de Inteligencia Artificial 
+generativa durante el desarrollo de este Trabajo. Las herramientas han actuado exclusivamente como 
+un sistema de asistencia y tutorización bajo supervisión constante, aplicándose en los siguientes ámbitos:
+
+\begin{itemize}
+    \item \textbf{Asistencia en Ingeniería del Software y Refactorización}: Resolución de bloqueos técnicos específicos, como la congelación del 
+    hilo principal de renderizado en \texttt{PyGame} y la optimización del control de eventos dentro de la Máquina de Estados Finita (FSM). 
+    \textit{Ejemplo de prompt: "Cuando la IA mueve en mi bucle principal de PyGame, el texto de la pantalla desaparece hasta que me vuelve a tocar. ¿Cómo soluciono este problema de refresco?"}
+    
+    \item \textbf{Análisis Analítico de Hiperparámetros}: Apoyo en la interpretación de los datos de validación arrojados por \texttt{Keras} (MAE y Loss) para 
+    diagnosticar fenómenos matemáticos como el sobreajuste (\textit{overfitting}) de la red neuronal. 
+    \textit{Ejemplo de prompt: "He entrenado un modelo denso muy profundo (128-64-32 neuronas) y he obtenido un MAE de entrenamiento de 0.85 pero un MAE de validación de 0.99. ¿Por qué ocurre este comportamiento?"}
+    
+    \item \textbf{Formato y Estilo Académico}: Asistencia en la composición tipográfica avanzada mediante \LaTeX, generación de estructuras de tablas y refinamiento del 
+    tono académico en apartados teóricos. 
+    \textit{Ejemplo de prompt: "Revisa la redacción de este párrafo sobre las Redes Convolucionales para asegurar que el tono sea adecuado para un artículo de estilo IEEE, sin alterar los datos obtenidos en mi script."}
+\end{itemize}
+
+Cabe destacar que todo el código fuente ejecutable, la orquestación de la arquitectura del proyecto, la ejecución empírica de 
+los torneos, así como las decisiones finales de diseño, son fruto del trabajo intelectual directo y exclusivo del autor de este documento.
+
 \section{Bibliografía}
 
 \begin{thebibliography}{00}
@@ -580,6 +608,9 @@ las limitaciones computacionales y heurísticas identificadas durante el proyect
     \bibitem{apuntes_nn} Dpto. de Ciencias de la Computación e Inteligencia Artificial, ``Redes neuronales'', Universidad de Sevilla, Apuntes de la asignatura Inteligencia Artificial, Curso 2025/2026.
     \bibitem{alphago} D. Silver et al., ``Mastering the game of Go with deep neural networks and tree search,'' \textit{Nature}, vol. 529, no. 7587, pp. 484-489, 2016.
     \bibitem{pygame} Pygame Community, ``Pygame: a primer on game programming in Python,'' [Online]. Disponible en: https://www.pygame.org/docs/
+    \bibitem{numpy} C. R. Harris et al., ``Array programming with NumPy,'' \textit{Nature}, vol. 585, no. 7825, pp. 357--362, 2020.
+    \bibitem{keras} F. Chollet et al., ``Keras,'' 2015. [Online]. Disponible en: https://keras.io
+    \bibitem{scikit-learn} F. Pedregosa et al., ``Scikit-learn: Machine Learning in Python,'' \textit{Journal of Machine Learning Research}, vol. 12, pp. 2825--2830, 2011.
 \end{thebibliography}    
 \vspace{12pt}
 \color{red}
